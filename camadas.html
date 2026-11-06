@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Prega vocal · 5 camadas · Cante Bonito</title>
+<script>
+if(window.top===window){location.replace('index.html#camadas'+location.search);}
+if(/[?&]limpo/.test(location.search))document.documentElement.classList.add('limpo');
+</script>
+<link rel="stylesheet" href="ui.css">
+<style>
+#lista{position:fixed;left:16px;top:calc(var(--top) + 12px);width:256px;z-index:5;overflow:hidden}
+#lista .lst{padding:6px 8px 10px}
+#lista h3{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim);font-weight:600;margin:12px 8px 4px}
+.ly{display:flex;gap:10px;align-items:center;padding:7px 8px;border-radius:10px;cursor:pointer}
+.ly:hover{background:rgba(255,255,255,.06)}
+.ly.on{background:rgba(255,212,59,.12);box-shadow:inset 0 0 0 1px rgba(255,212,59,.4)}
+.ly .n{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-weight:900;font-size:12.5px;color:var(--acc-ink);flex:none}
+.ly b{display:block;font-size:13px;font-weight:600;line-height:1.15}
+.ly i{display:block;font-style:normal;font-family:'Caveat Brush',cursive;color:var(--acc);font-size:16px;line-height:1.1}
+#nota{position:fixed;left:16px;bottom:16px;width:256px;z-index:5;padding:13px 15px;font-size:12.5px;line-height:1.5;color:var(--mut)}
+#nota b{display:block;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc);font-weight:600;margin-bottom:4px}
+#ctrl{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:6;padding:10px 12px 12px;display:flex;flex-direction:column;gap:9px;width:min(600px,calc(100vw - 24px))}
+#ctrl .modos{display:flex;gap:2px;padding:3px;border-radius:11px;background:rgba(255,255,255,.05)}
+#ctrl .modos button{flex:1;padding:8px;border-radius:8px;font-size:13px;font-weight:600;color:var(--mut)}
+#ctrl .modos button.on{background:var(--acc);color:var(--acc-ink)}
+#ctlUma,#ctlCiclo{display:flex;flex-direction:column;gap:9px}
+#ctrl .bts{display:flex;gap:6px}
+#ctrl .bts button{flex:1;padding:9px 10px;border-radius:10px;font-weight:600;font-size:12.8px;background:rgba(255,255,255,.06);color:var(--mut)}
+#ctrl .bts button:hover{color:var(--txt);background:rgba(255,255,255,.1)}
+#ctrl .bts button.on{background:var(--grad);color:#fff}
+#ctrl label{display:flex;gap:10px;align-items:center;font-size:11.5px;color:var(--dim);white-space:nowrap}
+#fases{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+#fases span{font-size:11.5px;font-weight:600;padding:7px 4px;border-radius:9px;background:rgba(255,255,255,.05);color:var(--dim);text-align:center;transition:.15s}
+#fases span.on{background:var(--grad);color:#fff}
+#cap{font-size:12.5px;line-height:1.45;color:var(--mut);text-align:center;height:38px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.card .an{font-family:'Caveat Brush',cursive;color:var(--acc);font-size:26px;line-height:1;margin:-4px 0 10px}
+.card .serve{margin-top:12px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid var(--line)}
+.card .serve b{display:block;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc);font-weight:600;margin-bottom:5px}
+#labels{position:fixed;inset:0;pointer-events:none;z-index:4}
+.lab{position:absolute;left:0;top:0;pointer-events:auto;cursor:pointer;white-space:nowrap}
+#lines{position:fixed;inset:0;pointer-events:none;z-index:4;width:100%;height:100%}
+.adot{position:fixed;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 2px rgba(15,11,25,.75);z-index:4;pointer-events:none}
+.lab span{font-size:12px;font-weight:600;padding:5px 10px;border-radius:8px;background:rgba(15,11,25,.86);border:1px solid var(--line2)}
+.lab span em{font-style:normal;font-family:'Caveat Brush',cursive;color:var(--acc);font-size:15px;margin-left:6px}
+@media (max-width:1100px){#lista,#nota{display:none}}
+@media (max-width:760px){
+  #ctrl{left:10px;right:10px;width:auto;transform:none;bottom:10px}
+  #cap{height:54px;font-size:11.5px}#fases span{font-size:10.5px}
+  .card{left:10px;right:10px;width:auto;top:auto;bottom:10px;max-height:60vh;transform:translateY(115%)}.card.on{transform:none}
+  .lab span{font-size:10.5px;padding:3px 7px}.lab span em{display:none}
+  .cred{display:none}
+}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<svg id="lines"></svg><div id="labels"></div>
+<div id="tip"></div>
+<div id="lista" class="panel"><div class="ph"><b>As 5 camadas</b><small>clique pra estudar</small></div><div class="lst"></div></div>
+<div id="nota" class="panel"><b>Só a prega vocal</b>Só a prega vocal produz som. Só ela tem essa estrutura em 5 camadas e uma mucosa tão especializada: um epitélio escamoso.</div>
+<div id="card" class="card panel">
+  <button class="x" aria-label="Fechar">×</button>
+  <span class="tag"></span><h2></h2><div class="an"></div>
+  <p class="oq"></p>
+  <div class="serve"><b>Pra que serve</b><p></p></div>
+</div>
+<div id="ctrl" class="panel">
+  <div class="modos"><button data-modo="uma" class="on">Uma prega</button><button data-modo="ciclo">Ciclo glótico</button></div>
+  <div id="ctlUma">
+  <div class="bts"><button data-m="escada" class="on">Em degraus</button><button data-m="corte">Corte reto</button><button id="onda">▶ Onda mucosa</button></div>
+  <label>Juntas <input id="sep" type="range" min="0" max="100" value="0"> separadas</label>
+  </div>
+  <div id="ctlCiclo" style="display:none">
+  <div id="fases"></div>
+  <div class="bts"><button id="play">⏸ Pausar</button><button id="passo">Próxima fase →</button></div>
+  <label>Bem lento <input id="vel" type="range" min="0" max="100" value="35"> mais rápido</label>
+  </div>
+  <div id="cap">Clique numa camada pra saber o que ela é e pra que serve.</div>
+</div>
+<div id="cred" class="cred">Ilustração esquemática (espessuras aumentadas pra ver melhor) · camadas segundo Hirano</div>
+
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+const Q=new URLSearchParams(location.search);
+const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
+const sstep=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
+const lerp=(a,b,t)=>a+(b-a)*t;
+
+/* ---------- cena ---------- */
+const canvas=document.getElementById('c');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,preserveDrawingBuffer:Q.has('shot')});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.95;
+const scene=new THREE.Scene();scene.environment=new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(),.04).texture;
+const camera=new THREE.PerspectiveCamera(30,1,.1,100);
+const controls=new OrbitControls(camera,canvas);
+controls.enableDamping=true;controls.dampingFactor=.09;controls.zoomToCursor=true;controls.zoomSpeed=.85;controls.rotateSpeed=.75;controls.minDistance=3;controls.maxDistance=30;controls.screenSpacePanning=true;
+const TARGET=V(.7,-.3,1.25), HOME=V(-6.5,3.2,-6.2).multiplyScalar(1.12).add(TARGET);
+camera.position.copy(HOME);controls.target.copy(TARGET);
+scene.add(new THREE.HemisphereLight(0xffffff,0x2a1850,.6));
+const k1=new THREE.DirectionalLight(0xffffff,1.8);k1.position.set(-5,7,-6);scene.add(k1);
+const k2=new THREE.DirectionalLight(0xb49bff,.7);k2.position.set(6,2,4);scene.add(k2);
+const k3=new THREE.DirectionalLight(0xffb27a,.7);k3.position.set(-2,-4,5);scene.add(k3);
+
+/* ---------- texturas desenhadas ---------- */
+function tex(draw,rep=[1,1]){const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d');draw(g);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(...rep);t.colorSpace=THREE.SRGBColorSpace;return t;}
+const T={
+  epit:tex(g=>{g.fillStyle='#fff';g.fillRect(0,0,256,256);g.strokeStyle='rgba(120,90,110,.22)';g.lineWidth=1.5;for(let y=0;y<256;y+=16)for(let x=(y/16%2)*12;x<256;x+=24){g.beginPath();g.ellipse(x,y,11,7,0,0,6.3);g.stroke();}},[3,3]),
+  gel:tex(g=>{g.fillStyle='#fff';g.fillRect(0,0,256,256);for(let i=0;i<70;i++){const x=Math.random()*256,y=Math.random()*256,r=3+Math.random()*9;const gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(1,'rgba(200,150,170,.35)');g.fillStyle=gr;g.beginPath();g.arc(x,y,r,0,6.3);g.fill();}},[2,2]),
+  elas:tex(g=>{g.fillStyle='#fff';g.fillRect(0,0,256,256);g.strokeStyle='rgba(170,120,0,.55)';g.lineWidth=2.2;for(let y=8;y<256;y+=14){g.beginPath();for(let x=0;x<=256;x+=4)g.lineTo(x,y+4*Math.sin(x/12+y));g.stroke();}},[2,2]),
+  barb:tex(g=>{g.fillStyle='#fff';g.fillRect(0,0,256,256);for(let y=0;y<256;y+=3){g.fillStyle=`rgba(120,80,40,${.15+Math.random()*.35})`;g.fillRect(0,y,256,1.6);}for(let x=0;x<256;x+=22){g.strokeStyle='rgba(120,80,40,.25)';g.beginPath();g.moveTo(x,0);g.lineTo(x+40,256);g.stroke();}},[2,2]),
+  musc:tex(g=>{g.fillStyle='#fff';g.fillRect(0,0,256,256);for(let y=0;y<256;y+=2){const v=190+Math.random()*65|0;g.fillStyle=`rgb(${v},${v},${v})`;g.fillRect(0,y,256,1+(Math.random()*2|0));}},[1,3]),
+};
+
+/* ---------- as 5 camadas ---------- */
+const CAM=[
+ {id:'epit',n:1,nome:'Epitélio',an:'meia-calça fina',grupo:'Cobertura',cor:'#F7EEF0',tex:'epit',f:[0,.07],op:1,
+  oq:'A “pele” de fora da prega: um epitélio escamoso estratificado, fino e resistente ao atrito.',
+  serve:'Dá suporte e segura tudo por dentro, deixando a prega ser moldada em formatos diferentes. Só a prega vocal tem uma mucosa tão especializada.'},
+ {id:'sup',n:2,nome:'Camada superficial',an:'gelatina',grupo:'Cobertura',cor:'#F4A9BC',tex:'gel',f:[.07,.4],op:.82,
+  oq:'Logo embaixo do epitélio. Tem bastante líquido e é bem frouxa. Também se chama espaço de Reinke.',
+  serve:'É ela que deixa a mucosa deslizar e ondular solta por cima do resto: a onda mucosa. Quando incha (edema de Reinke), a voz fica mais grave e rouca.'},
+ {id:'int',n:3,nome:'Camada intermediária',an:'elástico',grupo:'Transição · ligamento vocal',cor:'#FFD84A',tex:'elas',f:[.4,.66],op:1,
+  oq:'Cheia de fibras elásticas.',
+  serve:'Deixa a prega esticar e voltar ao lugar, como um elástico. Junto com a camada profunda, forma o ligamento vocal.'},
+ {id:'prof',n:4,nome:'Camada profunda',an:'barbante (denso)',grupo:'Transição · ligamento vocal',cor:'#E2B07E',tex:'barb',f:[.66,1],op:1,
+  oq:'Fibras de colágeno bem juntas: densa e resistente.',
+  serve:'Segura a tensão quando a prega estica no agudo e dá firmeza. É a parte mais forte do ligamento vocal.'},
+ {id:'musc',n:5,nome:'Muscular',an:'fibra muscular',grupo:'Corpo',cor:'#B23A45',tex:'musc',f:[1,2],op:1,
+  oq:'O músculo vocal, a parte de dentro do tireoaritenóideo.',
+  serve:'É o corpo da prega: contrai pra encurtar, engrossar e dar firmeza. Muda a forma e a tensão de todas as camadas que estão por cima.'},
+];
+// contorno da prega em corte (x pra fora, y pra cima); borda livre em x≈0
+const curve=pts=>new THREE.CatmullRomCurve3(pts.map(p=>V(p[0],p[1],0)),false,'centripetal');
+const C0=curve([[2.4,.62],[1.4,.56],[.6,.46],[.14,.24],[0,0],[.1,-.28],[.5,-.66],[1.35,-1.08],[2.4,-1.36]]);
+const C1=curve([[2.4,.3],[1.6,.24],[1.05,.12],[.82,-.08],[.98,-.42],[1.6,-.78],[2.4,-.98]]);
+const C2=curve([[3.4,.42],[3.4,.1],[3.4,-.3],[3.4,-.7],[3.4,-1.15]]);
+function P2(t,f){ // ponto no corte
+  if(f<=1){const a=C0.getPoint(t),b=C1.getPoint(t);return a.lerp(b,f);}
+  const a=C1.getPoint(t),b=C2.getPoint(t);return a.lerp(b,f-1);
+}
+const LEN=6, NT=70, NF=6, NZ=30;
+const S={sep:0,esc:1,onda:0,t:0,ciclo:0,ph:0}, TG={sep:0,esc:1,onda:0,ciclo:0};
+function zStart(k){return lerp((4-k)*.72*S.esc,LEN*.5,S.ciclo);}
+const KC=1.4,BC=.2;
+const abre=(ph,y)=>Math.max(0,Math.sin(ph-KC*(y+.2))+BC);
+const layers=[];
+CAM.forEach((c,k)=>{
+  // monta 6 faces da camada como grades (t,f,z)
+  const faces=[['t','z',c.f[0]],['t','z',c.f[1]],['t','f',0],['t','f',1],['f','z',0],['f','z',1]];
+  const pos=[],uv=[],idx=[],meta=[];let base=0;
+  for(const [a,b,fix] of faces){
+    const na=a==='t'?NT:a==='f'?NF:NZ, nb=b==='t'?NT:b==='f'?NF:NZ;
+    for(let i=0;i<=na;i++)for(let j=0;j<=nb;j++){
+      const p={t:0,f:0,z:0};p[a]=i/na;p[b]=j/nb;
+      if(a==='t'&&b==='z')p.f=fix===c.f[0]?0:1; else if(b==='f')p.z=fix; else p.t=fix;
+      meta.push(p.t,p.f,p.z);pos.push(0,0,0);
+      uv.push(a==='t'?p.t*2:p.f,b==='z'?p.z*3:p.f*2);
+    }
+    for(let i=0;i<na;i++)for(let j=0;j<nb;j++){const q=base+i*(nb+1)+j;idx.push(q,q+nb+1,q+1,q+1,q+nb+1,q+nb+2);}
+    base+=(na+1)*(nb+1);
+  }
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);
+  const mat=new THREE.MeshPhysicalMaterial({color:c.cor,map:T[c.tex],bumpMap:T[c.tex],bumpScale:c.id==='musc'?1:.5,roughness:c.id==='sup'?.15:.42,clearcoat:c.id==='epit'||c.id==='sup'?1:.35,clearcoatRoughness:.2,side:THREE.DoubleSide,transparent:c.op<1,opacity:c.op,depthWrite:c.op>=1});
+  const m=new THREE.Mesh(g,mat);m.userData.k=k;m.frustumCulled=false;scene.add(m);
+  const m2=new THREE.Mesh(g,mat);m2.scale.x=-1;m2.userData.k=k;m2.frustumCulled=false;m2.visible=false;scene.add(m2);
+  layers.push({c,k,g,mat,mesh:m,mesh2:m2,meta:new Float32Array(meta)});
+});
+function build(){
+  for(const L of layers){
+    const {c,k,g,meta}=L;const a=g.attributes.position;
+    const f0=c.f[0],f1=c.f[1],z0=zStart(k);
+    const off=V(-(4-k)*.42*S.sep*(1-S.ciclo),(4-k)*.06*S.sep*(1-S.ciclo),0);
+    for(let i=0;i<a.count;i++){
+      const t=meta[i*3],ff=lerp(f0,f1,meta[i*3+1]),z=lerp(z0,LEN,meta[i*3+2]);
+      const p=P2(t,ff);
+      // onda mucosa: a cobertura ondula de baixo pra cima sobre o corpo
+      if(S.ciclo>.001){const zE=Math.sin(Math.PI*clamp(z/LEN,0,1));const env=Math.exp(-(((t-.5)/.3)**2));
+        const aF=1-.55*sstep(.3,1,ff)-.3*sstep(1,1.6,ff);const d=.42*S.ciclo*abre(S.ph,p.y)*env*aF*zE;
+        p.x+=d+.006*S.ciclo;p.y+=.25*d*Math.cos(S.ph-KC*(p.y+.2));}
+      if(S.onda>.001&&S.ciclo<.999){const amp=.22*S.onda*(1-S.ciclo)*sstep(.75,.05,ff)*Math.exp(-(((t-.5)/.22)**2))*Math.sin(Math.PI*clamp(z/LEN,0,1)*.9+.15);
+        const ph=S.t*Math.PI*2*.9-p.y*3.2;p.x+=amp*Math.sin(ph);p.y+=amp*.35*Math.cos(ph);}
+      a.setXYZ(i,p.x+off.x,p.y+off.y,z);
+    }
+    a.needsUpdate=true;g.computeVertexNormals();g.boundingSphere=null;
+  }
+}
+
+/* ---------- ar no ciclo ---------- */
+const NA=180,aPos=new Float32Array(NA*3),AR=[];for(let i=0;i<NA;i++)AR.push({y:-2.6+Math.random()*2.6,x:(Math.random()-.5)*1.4,z:Math.random(),sp:.5+Math.random()*.5});
+const aGeo=new THREE.BufferGeometry();aGeo.setAttribute('position',new THREE.BufferAttribute(aPos,3));
+const ar=new THREE.Points(aGeo,new THREE.PointsMaterial({color:0xFFDA00,size:.07,transparent:true,depthWrite:false}));ar.visible=false;scene.add(ar);
+function gap(){let g=1e9;for(let y=-.45;y<=.3;y+=.05)g=Math.min(g,abre(S.ph,y));return 2*(.006+.42*g*.92);}
+function stepAr(dt,vel){const g=gap(),gy=-.05;
+  for(const p of AR){let ny=p.y+dt*p.sp*(.6+vel*1.6)*(g>.03?2.2:.6);
+    if(p.y<gy-.25&&ny>=gy-.25&&g<.03)ny=gy-.25-Math.random()*.9;
+    if(ny>2.2){ny=-2.6;p.x=(Math.random()-.5)*1.4;}p.y=ny;
+    const sq=sstep(-.9,gy,ny)*sstep(1.1,gy,ny);const x=lerp(p.x,p.x/1.4*Math.max(g*.8,.01),sq);
+    aPos.push;const i=AR.indexOf(p);aPos[i*3]=x;aPos[i*3+1]=ny;aPos[i*3+2]=LEN*.5-.05+p.z*.25;}
+  aGeo.attributes.position.needsUpdate=true;}
+
+/* ---------- fases do ciclo ---------- */
+const FASES=[['Fase fechada','As pregas estão juntas. O ar dos pulmões se acumula embaixo e a pressão subglótica sobe.'],
+ ['Fase de abertura','A pressão vence e as pregas se afastam: primeiro a parte de baixo, depois a de cima.'],
+ ['Fase aberta','A glote está aberta e o ar passa num pulso. É esse pulso que vira som.'],
+ ['Fase de fechamento','As pregas voltam, primeiro embaixo, pela elasticidade e pelo efeito Bernoulli, até se chocarem. Isso se repete centenas de vezes por segundo.']];
+const fasesEl=document.getElementById('fases');FASES.forEach(f=>{const s=document.createElement('span');s.textContent=f[0];fasesEl.appendChild(s);});
+function fase(ph){const lo=Math.sin(ph-KC*(-.45+.2))+BC>0,up=Math.sin(ph-KC*(.3+.2))+BC>0;
+  if(!lo&&!up)return 0;if(lo&&!up)return 1;if(lo&&up)return 2;return 3;}
+
+/* ---------- lista, card, nomes ---------- */
+const lista=document.querySelector('#lista .lst');let lastG='';
+for(const c of CAM){
+  if(c.grupo!==lastG){const h=document.createElement('h3');h.textContent=c.grupo;lista.appendChild(h);lastG=c.grupo;}
+  const r=document.createElement('div');r.className='ly';r.dataset.id=c.id;
+  r.innerHTML=`<span class="n" style="background:${c.cor}">${c.n}</span><div><b>${c.nome}</b><i>${c.an}</i></div>`;
+  r.onclick=()=>select(c.id);lista.appendChild(r);
+}
+const card=document.getElementById('card');let sel=null;
+function select(id){
+  sel=id;const c=CAM.find(x=>x.id===id);
+  card.querySelector('.tag').textContent=`Camada ${c.n} de 5 · ${c.grupo}`;card.querySelector('h2').textContent=c.nome;
+  card.querySelector('.an').textContent=c.an;card.querySelector('.oq').textContent=c.oq;card.querySelector('.serve p').textContent=c.serve;
+  card.classList.add('on');document.querySelectorAll('.ly').forEach(r=>r.classList.toggle('on',r.dataset.id===id));
+  for(const L of layers){const on=L.c.id===id;L.mat.emissive.set(on?0x2e2200:0);L.mat.opacity=on||!id?L.c.op:.18;L.mat.transparent=L.mat.opacity<1;L.mat.depthWrite=L.mat.opacity>=1;L.mat.needsUpdate=true;}
+}
+function deselect(){sel=null;card.classList.remove('on');document.querySelectorAll('.ly').forEach(r=>r.classList.remove('on'));
+  for(const L of layers){L.mat.emissive.set(0);L.mat.opacity=L.c.op;L.mat.transparent=L.c.op<1;L.mat.depthWrite=L.c.op>=1;L.mat.needsUpdate=true;}}
+card.querySelector('.x').onclick=deselect;
+const labWrap=document.getElementById('labels');
+const svg=document.getElementById('lines');
+const LAB=CAM.map((c,k)=>{const d=document.createElement('div');d.className='lab';d.innerHTML=`<span>${c.n} · ${c.nome}<em>${c.an}</em></span>`;d.onclick=()=>select(c.id);labWrap.appendChild(d);
+  const dot=document.createElement('i');dot.className='adot';document.body.appendChild(dot);
+  const ln=document.createElementNS('http://www.w3.org/2000/svg','path');ln.setAttribute('stroke','rgba(255,255,255,.55)');ln.setAttribute('fill','none');ln.setAttribute('stroke-width','1');svg.appendChild(ln);return {c,k,d,dot,ln};});
+function anchor(k){const c=CAM[k];const fm=c.id==='musc'?1.25:(c.f[0]+c.f[1])/2;
+  const a=P2(.5,fm), b=P2([.2,.24,.28,.32,.3][k],c.f[0]+.005);const e=S.esc;
+  const p=V(lerp(a.x,b.x,e)+.006*S.ciclo,lerp(a.y,b.y,e),lerp(zStart(k)-.01,zStart(k)+.45,e));
+  return p.add(V(-(4-k)*.42*S.sep,(4-k)*.06*S.sep,0));}
+function updLabels(){const W=innerWidth,H=innerHeight;if(S.ciclo>.02){for(const L of LAB){L.d.style.display=L.dot.style.display=L.ln.style.display='none';}return;}const pts=LAB.map(L=>{const v=anchor(L.k).project(camera);return {L,x:(v.x*.5+.5)*W,y:(-v.y*.5+.5)*H,ok:v.z<1};});
+  const hide=!!sel; const colX=Math.min(Math.max(...pts.map(p=>p.x))+70,W-(W<760?150:300));
+  const order=[...pts].sort((a,b)=>a.y-b.y);let lastY=-1e9;const gap=W<760?26:34;
+  for(const p of order){p.ly=Math.max(p.y,lastY+gap);lastY=p.ly;}
+  for(const p of pts){const {L}=p;const on=!hide&&p.ok;L.d.style.display=on?'':'none';L.dot.style.display=on?'':'none';L.ln.style.display=on?'':'none';if(!on)continue;
+    L.dot.style.left=p.x+'px';L.dot.style.top=p.y+'px';L.d.style.transform=`translate(${colX}px,${p.ly}px) translateY(-50%)`;
+    L.ln.setAttribute('d',`M${p.x},${p.y} C${(p.x+colX)/2},${p.y} ${(p.x+colX)/2},${p.ly} ${colX-4},${p.ly}`);}}
+
+/* ---------- controles ---------- */
+document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{TG.esc=b.dataset.m==='escada'?1:0;document.querySelectorAll('[data-m]').forEach(x=>x.classList.toggle('on',x===b));
+  document.getElementById('cap').textContent=TG.esc?'Em degraus: cada camada de fora é mais curta, pra você ver a de baixo.':'Corte reto: as 5 camadas lado a lado, como num corte da prega.';});
+const ondaB=document.getElementById('onda');
+ondaB.onclick=()=>{TG.onda=TG.onda?0:1;ondaB.classList.toggle('on',!!TG.onda);ondaB.textContent=TG.onda?'■ Parar onda':'▶ Onda mucosa';
+  document.getElementById('cap').textContent=TG.onda?'A cobertura (epitélio + gelatina) ondula de baixo pra cima sobre o corpo, que fica parado. Em câmera lenta.':'Clique numa camada pra saber o que ela é e pra que serve.';};
+const sep=document.getElementById('sep');sep.oninput=()=>{TG.sep=sep.value/100;};
+let tween=null;function flyTo(p,t,d=1){tween={p0:camera.position.clone(),t0:controls.target.clone(),p1:p,t1:t,t:0,d};}
+controls.addEventListener('start',()=>tween=null);
+const CIC_T=V(0,-.3,LEN*.5+.4),CIC_P=V(2.2,2.6,LEN*.5-12.6);
+let jumpNow=false;let modo='uma',tocando=true,vel=.35,lastF=-1,alvoF=-1;
+function setModo(m){modo=m;document.querySelectorAll('[data-modo]').forEach(b=>b.classList.toggle('on',b.dataset.modo===m));
+  document.getElementById('ctlUma').style.display=m==='uma'?'':'none';document.getElementById('ctlCiclo').style.display=m==='ciclo'?'':'none';
+  TG.ciclo=m==='ciclo'?1:0;if(m==='ciclo'){TG.sep=0;sep.value=0;if(TG.onda)ondaB.click();}deselect();
+  const port=innerWidth<innerHeight?1.7:1;
+  if(m==='ciclo')flyTo(CIC_T.clone().add(CIC_P.clone().sub(CIC_T).multiplyScalar(port)),CIC_T.clone());else flyTo(TARGET.clone().add(HOME.clone().sub(TARGET).multiplyScalar(port)),TARGET.clone());
+  document.getElementById('cap').textContent=m==='ciclo'?'':'Clique numa camada pra saber o que ela é e pra que serve.';lastF=-1;}
+document.querySelectorAll('[data-modo]').forEach(b=>b.onclick=()=>setModo(b.dataset.modo));
+const playB=document.getElementById('play');playB.onclick=()=>{tocando=!tocando;alvoF=-1;playB.textContent=tocando?'⏸ Pausar':'▶ Continuar';};
+document.getElementById('passo').onclick=()=>{alvoF=(fase(S.ph)+1)%4;tocando=true;playB.textContent='⏸ Pausar';};
+const velS=document.getElementById('vel');velS.oninput=()=>{vel=velS.value/100;};
+
+/* ---------- clique ---------- */
+const ray=new THREE.Raycaster(),mouse=new THREE.Vector2(),tip=document.getElementById('tip');let down=null;
+function pick(e){const r=canvas.getBoundingClientRect();mouse.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(mouse,camera);
+  const h=ray.intersectObjects(layers.map(l=>l.mesh).filter(m=>m.material.opacity>.3),false)[0];return h?CAM[h.object.userData.k]:null;}
+canvas.addEventListener('pointerdown',e=>down={x:e.clientX,y:e.clientY});
+canvas.addEventListener('pointerup',e=>{if(down&&Math.hypot(e.clientX-down.x,e.clientY-down.y)<6){const c=pick(e);if(c)select(c.id);else if(sel)deselect();}down=null;});
+let lm=0;canvas.addEventListener('pointermove',e=>{const n=performance.now();if(e.buttons||n-lm<70||e.pointerType!=='mouse')return;lm=n;const c=pick(e);canvas.classList.toggle('hov',!!c);
+  if(c){tip.textContent=`${c.n} · ${c.nome} (${c.an})`;tip.style.left=e.clientX+'px';tip.style.top=e.clientY+'px';tip.style.opacity=1;}else tip.style.opacity=0;});
+
+/* ---------- loop ---------- */
+function resize(){renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();
+  if(innerWidth<innerHeight){camera.position.copy(TARGET).add(HOME.clone().sub(TARGET).multiplyScalar(1.7));}}
+addEventListener('resize',resize);resize();
+
+if(Q.get('sep')){TG.sep=+Q.get('sep');sep.value=TG.sep*100;}
+if(Q.get('m')==='corte')document.querySelector('[data-m=corte]').click();
+if(Q.get('onda'))ondaB.click();
+if(Q.get('modo')==='ciclo'){setModo('ciclo');if(Q.get('ph'))S.ph=+Q.get('ph');tocando=!Q.has('ph');jumpNow=true;}
+Object.assign(S,TG);S.t=.3;
+const clock=new THREE.Clock();let lastKey='';
+function tick(){const dt=Math.min(clock.getDelta(),.05);const k=1-Math.exp(-dt*4.5);
+  for(const key of ['sep','esc','onda','ciclo'])S[key]+=(TG[key]-S[key])*k;S.t+=dt;
+  if(modo==='ciclo'&&tocando){S.ph=(S.ph+dt*Math.PI*2*(.12+vel*.9))%(Math.PI*2);const f=fase(S.ph);
+    if(alvoF>=0&&f===alvoF){tocando=false;alvoF=-1;playB.textContent='▶ Continuar';}}
+  if(modo==='ciclo'){const f=fase(S.ph);if(f!==lastF){lastF=f;[...fasesEl.children].forEach((s,i)=>s.classList.toggle('on',i===f));document.getElementById('cap').textContent=FASES[f][1];}}
+  for(const L of layers)L.mesh2.visible=S.ciclo>.02;ar.visible=S.ciclo>.6;if(ar.visible)stepAr(dt,vel);
+  const key=[S.sep,S.esc,S.onda,S.ciclo,S.ph].map(v=>v.toFixed(3)).join();if(key!==lastKey||S.onda>.001){build();lastKey=key;}
+  if(tween){tween.t+=dt/tween.d;const t=Math.min(tween.t,1),e=t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;camera.position.lerpVectors(tween.p0,tween.p1,e);controls.target.lerpVectors(tween.t0,tween.t1,e);if(t>=1)tween=null;}
+  controls.update();renderer.render(scene,camera);updLabels();requestAnimationFrame(tick);}
+if(jumpNow&&tween){camera.position.copy(tween.p1);controls.target.copy(tween.t1);tween=null;}
+build();if(Q.get('sel'))select(Q.get('sel'));tick();
+</script>
+</body>
+</html>

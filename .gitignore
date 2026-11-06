@@ -1,0 +1,6 @@
+.DS_Store
+modelo-original/
+molde-original-vocal-process.pdf
+*.v[0-9]*.html
+hub.*.html
+__pycache__/

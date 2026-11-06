@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Laringe 3D</title>
+<script>
+if(window.top===window){location.replace('index.html#laringe'+location.search.replace(/^\?/,'?'));}
+if(/[?&]limpo/.test(location.search))document.documentElement.classList.add('limpo');
+</script>
+<link rel="stylesheet" href="ui.css">
+<style>
+/* lista de partes */
+#partes{position:fixed;left:16px;top:calc(var(--top) + 12px);bottom:16px;width:252px;z-index:5;display:flex;flex-direction:column;overflow:hidden}
+#partes .lst{overflow:auto;padding:6px 8px 10px;scrollbar-width:thin;flex:1}
+.grp{border-bottom:1px solid var(--line)}
+.grp:last-child{border-bottom:0}
+.gh{display:flex;align-items:center;justify-content:space-between;width:100%;padding:10px 8px;font-weight:600;font-size:12.5px;color:var(--txt)}
+.gh span.c{font-size:11px;color:var(--dim);font-weight:600;margin-left:6px}
+.gh i{font-style:normal;color:var(--dim);transition:transform .2s}
+.grp.fechado .gh i{transform:rotate(-90deg)}
+.grp.fechado .rows{display:none}
+.rows{padding-bottom:6px}
+.row{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:9px;font-size:12.8px;line-height:1.25;color:var(--mut)}
+.row:hover{background:rgba(255,255,255,.06);color:var(--txt)}
+.row.on{background:rgba(255,212,59,.12);color:var(--txt);box-shadow:inset 0 0 0 1px rgba(255,212,59,.4)}
+.row .dot{width:10px;height:10px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+.row .nm{flex:1;cursor:pointer}
+.row .eye{width:26px;height:22px;border-radius:7px;opacity:.55;display:grid;place-items:center}
+.row .eye:hover{background:rgba(255,255,255,.1);opacity:1}
+.row.off .nm,.row.off .dot{opacity:.35}
+.eye svg{width:15px;height:15px}
+/* ajustes */
+#tools{position:fixed;right:16px;top:calc(var(--top) + 12px);width:232px;z-index:6;padding:4px 14px 14px;transition:opacity .25s,transform .25s}
+#tools .ttl{display:block;margin:12px 0 7px}
+body.comcard #tools{opacity:0;pointer-events:none;transform:translateX(20px)}
+/* poses */
+#poses{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:6;padding:10px 12px 12px;display:flex;flex-direction:column;gap:9px;align-items:stretch;width:min(640px,calc(100vw - 600px));min-width:520px}
+#poses .top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+#cap{font-size:12.5px;color:var(--mut);line-height:1.4;min-height:36px;display:flex;align-items:center}
+#poses .seg button{padding:9px 6px;font-size:13px}
+#poses .seg button.on{background:var(--grad);color:#fff}
+#poses .sl{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+/* nomes */
+#labels{position:fixed;inset:0;pointer-events:none;z-index:4}
+.lab{position:absolute;left:0;top:0;pointer-events:auto;cursor:pointer;white-space:nowrap;transition:opacity .2s}
+.lab span{display:block;font-size:11.5px;font-weight:600;padding:4px 9px;border-radius:8px;background:rgba(15,11,25,.85);border:1px solid var(--line2)}
+.lab i{display:block;width:1px;height:14px;margin:0 auto;background:rgba(255,255,255,.5)}
+.lab b{display:block;width:7px;height:7px;border-radius:50%;margin:-1px auto 0;background:var(--acc);box-shadow:0 0 0 2px rgba(15,11,25,.7)}
+.lab.dim{opacity:.28}
+.mbtn{display:none}
+@media (max-width:1100px){
+  #poses{min-width:0;width:calc(100vw - 32px)}
+  #partes{display:none}
+  #partes.open{display:flex;top:auto;bottom:0;left:0;right:0;width:auto;height:62vh;border-radius:20px 20px 0 0;z-index:12}
+  .mbtn{display:block;position:fixed;top:calc(var(--top) + 12px);z-index:7;padding:8px 13px;font-weight:600;font-size:12.5px}
+  #btnPartes{left:16px}
+  .toast{display:none}
+}
+@media (max-width:760px){
+  #btnAjustes{right:16px}
+  #tools{display:none}
+  #tools.open{display:block;top:auto;bottom:0;left:0;right:0;width:auto;border-radius:20px 20px 0 0;z-index:12;max-height:70vh;overflow:auto}
+  #poses{left:10px;right:10px;width:auto;transform:none;bottom:10px;padding:8px}
+  #poses .sl{display:none}#cap{font-size:11.5px;min-height:32px}
+  #poses .seg{overflow-x:auto;scrollbar-width:none}#poses .seg button{flex:none;padding:8px 11px;font-size:12px}
+  .card{left:10px;right:10px;width:auto;top:auto;bottom:10px;max-height:62vh;transform:translateY(115%)}
+  .card.on{transform:none}
+  .lab span{font-size:10.5px;padding:3px 7px}
+  #zoom{bottom:auto;top:50%;transform:translateY(-50%);right:10px}
+  .cred{display:none}
+}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="labels"></div>
+<div id="tip"></div>
+<div id="hint" class="toast panel"><b>Arraste</b> pra girar · <b>role</b> pro zoom · <b>botão direito</b> pra mover · <b>clique</b> numa parte</div>
+
+<button id="btnPartes" class="panel mbtn">☰ Partes</button>
+<button id="btnAjustes" class="panel mbtn">⚙ Ajustes</button>
+<aside id="partes" class="panel"><div class="ph"><b>Partes</b><small>clique pra estudar</small></div><div class="lst"></div></aside>
+
+<aside id="tools" class="panel">
+  <span class="ttl">Vista</span>
+  <div class="grid2" id="segVista"><button data-v="frente">Frente</button><button data-v="lado">Lado</button><button data-v="tras">Trás</button><button data-v="cima">De cima</button></div>
+  <span class="ttl">Corte</span>
+  <div class="seg" id="segCorte"><button data-c="" class="on">Inteira</button><button data-c="lado">Ao meio</button><button data-c="frente">Frontal</button></div>
+  <span class="ttl">Separar peças</span>
+  <input id="explode" type="range" min="0" max="100" value="0">
+  <span class="ttl">Cores</span>
+  <div class="seg" id="segCor"><button data-k="atlas">Do caderno</button><button data-k="real">Reais</button></div>
+  <span class="ttl">Mostrar</span>
+  <div class="sw-row"><span>Nomes</span><button id="tgNomes" class="sw on" aria-label="Nomes"></button></div>
+  <div class="sw-row"><span>Ar</span><button id="tgAr" class="sw on" aria-label="Ar"></button></div>
+</aside>
+
+<div id="card" class="card panel">
+  <button class="x" aria-label="Fechar">×</button>
+  <span class="tag"></span>
+  <h2></h2>
+  <p class="oq"></p>
+  <div class="box canto"><b>No canto</b><p></p></div>
+  <div class="acts"><button class="btn pri go"></button><a class="btn" id="btnCamadas" href="index.html#camadas" target="_top" style="display:none">Ver as 5 camadas →</a><button class="btn" id="btnTudo">Mostrar tudo</button></div>
+</div>
+
+<div id="poses" class="panel">
+  <div id="cap"></div>
+  <div class="seg bts">
+    <button data-p="respirar" class="on">Respirar</button><button data-p="cantar">Cantar</button><button data-p="agudo">Agudo</button><button data-p="grave">Grave</button><button data-p="engolir">Engolir</button>
+  </div>
+  <div class="sl">
+    <div class="rng"><span>Pregas</span> <input id="slOpen" type="range" min="0" max="100" value="100" style="direction:rtl"></div>
+    <div class="rng"><span>Tireoide</span> <input id="slTilt" type="range" min="0" max="100" value="0"></div>
+  </div>
+</div>
+<div id="zoom" class="panel"><button id="zMais" title="Aproximar">+</button><button id="zMenos" title="Afastar">−</button><button id="zCentro" title="Voltar ao início">⟲</button></div>
+<div class="cred">Modelo 3D: BodyParts3D, © The Database Center for Life Science · CC BY-SA 2.1 JP</div>
+
+<script src="modelo.js"></script>
+<script type="module">
+/*APP*/
+</script>
+</body>
+</html>

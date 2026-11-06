@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Biblioteca da Sarah</title>
+<link rel="stylesheet" href="ui.css">
+<style>
+html,body{overflow:hidden}
+/* barra do topo */
+#bar{position:fixed;top:0;left:0;right:0;height:var(--top);z-index:30;display:flex;align-items:center;gap:14px;padding:0 16px;background:rgba(30,14,58,.86);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}
+#bar .logo{display:flex;align-items:center;gap:12px;text-decoration:none;cursor:pointer}
+#bar .logo img{height:42px;margin:-4px 0}
+#bar .logo span{font-weight:900;font-size:15px;letter-spacing:-.01em;text-transform:uppercase}
+#bar .logo span em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+#bar .sep{width:1px;height:26px;background:var(--line2)}
+#crumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--mut)}
+#crumb button{padding:7px 10px;border-radius:9px;font-weight:600}
+#crumb button:hover{background:rgba(255,255,255,.07);color:var(--txt)}
+#crumb .atual{color:var(--txt);display:flex;align-items:center;gap:8px}
+#crumb .atual i{font-style:normal;color:var(--dim);font-size:11px}
+#bar .esp{flex:1}
+#bar .ib{padding:8px 12px;border-radius:9px;font-size:12.5px;font-weight:600;color:var(--mut)}
+#bar .ib:hover{background:rgba(255,255,255,.07);color:var(--txt)}
+/* troca rápida */
+#troca{position:fixed;top:calc(var(--top) + 8px);left:16px;z-index:31;width:360px;padding:8px;display:none}
+#troca.on{display:block}
+#troca button{display:flex;gap:12px;align-items:center;width:100%;text-align:left;padding:8px;border-radius:12px}
+#troca button:hover{background:rgba(255,255,255,.07)}
+#troca button.on{background:rgba(255,212,59,.12)}
+#troca img{width:76px;height:48px;object-fit:cover;border-radius:8px;flex:none}
+#troca b{display:block;font-size:13px}
+#troca small{display:block;font-size:11.5px;color:var(--dim)}
+/* biblioteca */
+#home{position:fixed;inset:var(--top) 0 0 0;overflow:auto;padding:44px 40px 60px}
+#home .wrap{max-width:1180px;margin:0 auto}
+#home .secao{display:flex;align-items:baseline;gap:12px;margin:34px 0 0}
+#home .secao h2{font-weight:900;font-size:24px;text-transform:uppercase;letter-spacing:-.02em}
+#home .secao span{font-family:'Caveat Brush',cursive;color:var(--acc);font-size:22px}
+.hero{position:relative;overflow:hidden;border-radius:26px;min-height:340px;padding:44px 48px;background:linear-gradient(135deg,#8D51FE 0%,#B66BD6 45%,#FD924E 100%);display:flex;align-items:center}
+.hero::before{content:'';position:absolute;inset:0;background:url(art/mesh.png) center/cover;opacity:.18;mix-blend-mode:screen}
+.hero .htx{position:relative;z-index:2;max-width:560px}
+.hero .kick{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;background:rgba(26,17,48,.85);color:var(--acc);padding:5px 10px;border-radius:8px}
+.hero h1{font-weight:900;font-size:58px;line-height:.9;letter-spacing:-.03em;text-transform:uppercase;margin-top:14px;color:#fff}
+.hero h1 em{font-style:normal;color:var(--acc)}
+.hero .sig{font-family:'Caveat Brush',cursive;font-size:30px;color:var(--acc);transform:rotate(-3deg);transform-origin:left;margin-top:6px}
+.hero .lead{font-size:15px;color:rgba(255,255,255,.92);margin-top:10px;max-width:470px;line-height:1.55}
+.hero .foto{position:absolute;right:40px;bottom:0;height:118%;max-height:430px;z-index:2;filter:drop-shadow(0 20px 30px rgba(40,10,80,.35))}
+.hero .bola{position:absolute;border-radius:50%;z-index:1}
+.hero .b1{width:300px;height:300px;right:-40px;top:-90px;background:rgba(253,146,78,.75)}
+.hero .b2{width:220px;height:220px;right:260px;bottom:-120px;background:rgba(141,81,254,.7)}
+#filtros{display:flex;gap:6px;margin:28px 0 18px;flex-wrap:wrap}
+#filtros button{padding:8px 14px;border-radius:20px;font-size:12.5px;font-weight:600;color:var(--mut);border:1px solid var(--line2)}
+#filtros button:hover{color:var(--txt)}
+#filtros button.on{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+#grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+.mod{display:flex;flex-direction:column;text-align:left;border-radius:18px;overflow:hidden;background:var(--panel-solid);border:1px solid var(--line);transition:transform .2s,border-color .2s,box-shadow .2s}
+.mod:hover{transform:translateY(-3px);border-color:rgba(255,212,59,.45);box-shadow:var(--shadow)}
+.mod .img{position:relative;aspect-ratio:16/10;background:radial-gradient(400px 260px at 50% 50%,#5a2fa8,#22104a)}
+.mod .img img{width:100%;height:100%;object-fit:cover;display:block}
+.mod .cat{position:absolute;top:10px;left:10px;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;padding:4px 9px;border-radius:7px;background:rgba(15,11,25,.78);color:var(--acc)}
+.mod .num{position:absolute;top:10px;right:10px;font-size:11px;font-weight:600;padding:4px 8px;border-radius:7px;background:rgba(15,11,25,.78);color:var(--mut)}
+.mod .tx{padding:14px 16px 16px}
+.mod b{display:block;font-weight:900;font-size:19px;letter-spacing:-.01em;text-transform:uppercase}
+.mod p{font-size:13px;color:var(--mut);line-height:1.5;margin-top:5px}
+.mod .tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}
+.mod .tags span{font-size:11px;padding:3px 8px;border-radius:6px;background:rgba(255,255,255,.06);color:var(--mut)}
+.mod.breve{border-style:dashed;background:transparent;pointer-events:none}
+.mod.breve .img{display:grid;place-items:center;background:rgba(255,255,255,.02)}
+.mod.breve .img span{font-family:'Caveat Brush',cursive;color:var(--dim);font-size:26px}
+/* visualizador */
+#peca{position:fixed;top:0;left:0;width:100%;height:100%;border:0;display:none;background:#0f0b19}
+body.ver #peca{display:block}
+body.ver #home{display:none}
+#crumb .atual,#crumb .s2{display:none}
+body.ver #crumb .atual,body.ver #crumb .s2{display:flex}
+@media (max-width:760px){
+  #bar{gap:8px;padding:0 10px}
+  #bar .logo span,#bar .sep,#bar .ib{display:none}
+  #crumb{font-size:12px}
+  #home{padding:16px 12px 40px}.hero{padding:26px 22px 200px;min-height:0}.hero h1{font-size:34px}.hero .sig{font-size:24px}.hero .foto{height:230px;right:50%;transform:translateX(50%)}.hero .b2{display:none}
+  #troca{left:10px;right:10px;width:auto}
+}
+</style>
+</head>
+<body>
+<header id="bar">
+  <a class="logo" id="logo"><img src="art/logo-sarah-branca.png" alt="Sarah Batt"><span>Biblioteca <em>da Sarah</em></span></a>
+  <span class="sep"></span>
+  <nav id="crumb"><button id="bib">Início</button><span class="s2">›</span><button class="atual" id="atual"><span id="atualNome"></span><i>▾</i></button></nav>
+  <span class="esp"></span>
+  <button class="ib" id="cheia">⛶ Tela cheia</button>
+</header>
+<div id="troca" class="panel"></div>
+
+<main id="home"><div class="wrap">
+  <section class="hero">
+    <div class="htx">
+      <span class="kick">Biblioteca da Sarah</span>
+      <h1>A voz <em>por dentro</em><br>em 3D</h1>
+      <p class="sig">com Sarah Batt</p>
+      <p class="lead">Anatomia e fisiologia da voz pra estudar e consultar. Gire, corte, separe as peças e veja a função de cada parte.</p>
+    </div>
+    <img class="foto" src="art/sarah.png" alt="Sarah Batt">
+    <span class="bola b1"></span><span class="bola b2"></span>
+  </section>
+  <div class="secao"><h2>Modelos</h2><span>escolha um pra abrir</span></div>
+  <div id="filtros"></div>
+  <div id="grade"></div>
+</div></main>
+
+<iframe id="peca" title="Modelo 3D"></iframe>
+
+<script>
+// Pra adicionar um modelo: crie o .html dele e acrescente uma linha aqui.
+const MODELOS=[
+  {id:'laringe', arquivo:'laringe.html', nome:'Laringe 3D', cat:'Anatomia', img:'art/thumbs/laringe.jpg',
+   desc:'O modelo completo: cartilagens, músculos, pregas e ligamentos, com cortes e vistas.', tags:['25 partes','Respirar · cantar · agudo · grave · engolir']},
+  {id:'camadas', arquivo:'camadas.html', nome:'Prega vocal: 5 camadas', cat:'Histologia', img:'art/thumbs/camadas.jpg',
+   desc:'Do epitélio ao músculo, com a analogia de cada camada e a onda mucosa.', tags:['Cobertura e corpo','Onda mucosa']},
+  {id:'ciclo', arquivo:'camadas.html', q:'modo=ciclo', nome:'Ciclo glótico', cat:'Fisiologia', img:'art/thumbs/ciclo.jpg',
+   desc:'As duas pregas se chocando, com as 5 camadas, nas 4 fases do ciclo.', tags:['Fechada · abertura · aberta · fechamento']},
+  {id:'respiracao', arquivo:'respiracao.html', nome:'Respiração', cat:'Fisiologia', img:'art/thumbs/respiracao.jpg',
+   desc:'Inspiração e expiração, o apoio no canto, os 3 tipos de respiração e os desajustes dos músculos acessórios.', tags:['3 tipos','Apoio','Desajustes']},
+];
+const $=s=>document.querySelector(s);
+const cats=['Todos',...new Set(MODELOS.map(m=>m.cat))];let filtro='Todos';
+function grade(){
+  $('#filtros').innerHTML=cats.map(c=>`<button class="${c===filtro?'on':''}">${c}</button>`).join('');
+  [...$('#filtros').children].forEach((b,i)=>b.onclick=()=>{filtro=cats[i];grade();});
+  const lista=MODELOS.filter(m=>filtro==='Todos'||m.cat===filtro);
+  $('#grade').innerHTML=lista.map(m=>`<button class="mod" data-id="${m.id}"><div class="img"><img src="${m.img}" alt=""><span class="cat">${m.cat}</span><span class="num">${MODELOS.indexOf(m)+1}</span></div>
+    <div class="tx"><b>${m.nome}</b><p>${m.desc}</p><div class="tags">${m.tags.map(t=>`<span>${t}</span>`).join('')}</div></div></button>`).join('')
+    +(filtro==='Todos'?`<div class="mod breve"><div class="img"><span>novos modelos em breve</span></div><div class="tx"><b>Próximo modelo</b><p>A biblioteca cresce com o tempo.</p></div></div>`:'');
+  document.querySelectorAll('.mod[data-id]').forEach(b=>b.onclick=()=>location.hash=b.dataset.id);
+}
+$('#troca').innerHTML=MODELOS.map(m=>`<button data-id="${m.id}"><img src="${m.img}" alt=""><span><b>${m.nome}</b><small>${m.cat}</small></span></button>`).join('');
+document.querySelectorAll('#troca button').forEach(b=>b.onclick=()=>{location.hash=b.dataset.id;$('#troca').classList.remove('on');});
+function rota(){
+  const m=MODELOS.find(x=>x.id===location.hash.slice(1));
+  $('#troca').classList.remove('on');
+  if(!m){document.body.classList.remove('ver');$('#peca').removeAttribute('src');document.title='Biblioteca da Sarah';return;}
+  document.body.classList.add('ver');
+  const extra=location.search.replace(/^\?/,''), q=[m.q,extra].filter(Boolean).join('&');
+  const src=m.arquivo+(q?'?'+q:'');
+  if($('#peca').getAttribute('src')!==src)$('#peca').setAttribute('src',src);
+  $('#atualNome').textContent=m.nome;document.title=m.nome+' · Biblioteca da Sarah';
+  document.querySelectorAll('#troca button').forEach(b=>b.classList.toggle('on',b.dataset.id===m.id));
+}
+$('#bib').onclick=$('#logo').onclick=()=>{location.hash='';};
+$('#atual').onclick=e=>{e.stopPropagation();$('#troca').classList.toggle('on');};
+addEventListener('click',e=>{if(!e.target.closest('#troca'))$('#troca').classList.remove('on');});
+$('#cheia').onclick=()=>{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();};
+addEventListener('hashchange',rota);grade();rota();
+</script>
+</body>
+</html>

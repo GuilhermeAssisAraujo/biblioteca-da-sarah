@@ -1,0 +1,78 @@
+/* Estilo comum do app de estudo (biblioteca + modelos) */
+@font-face{font-family:Poppins;src:url(fonts/Poppins-400.ttf);font-weight:400}
+@font-face{font-family:Poppins;src:url(fonts/Poppins-600.ttf);font-weight:600}
+@font-face{font-family:Poppins;src:url(fonts/Poppins-900.ttf);font-weight:900}
+@font-face{font-family:'Caveat Brush';src:url(fonts/CaveatBrush-400.ttf)}
+:root{
+  --bg:#1A0E33;--bg2:#2A1650;
+  --panel:rgba(34,17,64,.84);--panel-solid:#2A1650;
+  --line:rgba(255,255,255,.11);--line2:rgba(255,255,255,.2);
+  --txt:#FFFFFF;--mut:rgba(255,255,255,.72);--dim:rgba(255,255,255,.48);
+  --acc:#FFDA00;--acc-ink:#1A1130;
+  --purple:#8D51FE;--orange:#FD924E;--grad:linear-gradient(135deg,#8D51FE,#FD924E);
+  --r:16px;--r2:10px;--top:64px;
+  --shadow:0 12px 40px rgba(0,0,0,.38);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;color:var(--txt);font-family:Poppins,'Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased;font-size:14px}
+body{background:radial-gradient(1000px 700px at 58% 44%,#5a2fa8 0%,#3a1c78 38%,#22104a 72%,#170a33 100%)}
+body::before{content:'';position:fixed;inset:0;background:url(art/mesh.png) center/cover;opacity:.07;pointer-events:none;mix-blend-mode:screen;z-index:-1}
+body::after{content:'';position:fixed;right:-180px;bottom:-220px;width:620px;height:620px;border-radius:50%;background:radial-gradient(circle,rgba(253,146,78,.35),rgba(253,146,78,0) 65%);pointer-events:none;z-index:-1}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{color:inherit}
+canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+canvas#c.drag{cursor:grabbing}canvas#c.hov{cursor:pointer}
+
+.panel{background:var(--panel);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.ttl{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim);font-weight:600}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;border-bottom:1px solid var(--line)}
+.ph b{font-weight:600;font-size:14px}
+.ph small{color:var(--dim);font-size:11.5px}
+
+/* controles */
+.seg{display:flex;gap:2px;padding:3px;border-radius:11px;background:rgba(255,255,255,.05)}
+.seg button{flex:1;padding:7px 10px;border-radius:8px;font-size:12.5px;font-weight:600;color:var(--mut);white-space:nowrap;transition:background .15s,color .15s}
+.seg button:hover{color:var(--txt);background:rgba(255,255,255,.06)}
+.seg button.on{background:var(--acc);color:var(--acc-ink)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.grid2 button{padding:8px;border-radius:9px;background:rgba(255,255,255,.05);font-size:12.5px;font-weight:600;color:var(--mut)}
+.grid2 button:hover{color:var(--txt);background:rgba(255,255,255,.09)}
+.grid2 button.on{background:var(--acc);color:var(--acc-ink)}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 14px;border-radius:var(--r2);font-weight:600;font-size:13px;background:rgba(255,255,255,.07);text-decoration:none;color:var(--txt)}
+.btn:hover{background:rgba(255,255,255,.12)}
+.btn.pri{background:var(--acc);color:var(--acc-ink)}
+.btn.pri:hover{filter:brightness(1.05)}
+.sw-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:13px;color:var(--mut)}
+.sw{width:36px;height:21px;border-radius:21px;background:rgba(255,255,255,.14);position:relative;transition:.2s;flex:none}
+.sw::after{content:'';position:absolute;top:3px;left:3px;width:15px;height:15px;border-radius:50%;background:#fff;transition:.2s}
+.sw.on{background:var(--acc)}.sw.on::after{left:18px;background:var(--acc-ink)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:4px;background:rgba(255,255,255,.16);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 0 0 4px rgba(255,212,59,.35)}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#fff;border:0}
+.rng{display:flex;align-items:center;gap:10px;font-size:11.5px;color:var(--dim);white-space:nowrap}
+
+/* card de informação */
+.card{position:fixed;right:16px;top:calc(var(--top) + 12px);width:340px;z-index:7;padding:18px 18px 16px;transform:translateX(115%);opacity:0;transition:.3s cubic-bezier(.2,.8,.2,1);max-height:calc(100vh - var(--top) - 150px);overflow:auto}
+.card.on{transform:none;opacity:1}
+.card .tag{display:inline-block;font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--acc);}
+.card h2{font-weight:900;font-size:24px;line-height:.98;letter-spacing:-.02em;text-transform:uppercase;margin:6px 34px 10px 0}
+.card p{font-size:13.5px;line-height:1.55;color:rgba(244,241,250,.86)}
+.card .box{margin-top:12px;padding:12px 14px;border-radius:12px;background:linear-gradient(135deg,rgba(141,81,254,.35),rgba(253,146,78,.25));border:1px solid var(--line)}
+.card .box b{display:block;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc);font-weight:600;margin-bottom:5px}
+.card .acts{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+.card .x{position:absolute;top:12px;right:12px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.07);font-size:17px;line-height:1}
+.card .x:hover{background:rgba(255,255,255,.14)}
+
+/* nomes na tela e dica */
+#tip{position:fixed;z-index:9;pointer-events:none;font-size:12px;font-weight:600;padding:5px 10px;border-radius:8px;background:var(--acc);color:var(--acc-ink);opacity:0;transform:translate(14px,14px);transition:opacity .12s}
+.toast{position:fixed;left:50%;top:calc(var(--top) + 12px);transform:translateX(-50%);z-index:5;font-size:12px;color:var(--mut);padding:8px 14px;white-space:nowrap;transition:opacity .6s}
+.toast b{color:var(--txt);font-weight:600}
+.toast.off{opacity:0;pointer-events:none}
+.cred{position:fixed;right:16px;bottom:8px;font-size:10px;color:var(--dim);z-index:3;opacity:.8}
+#zoom{position:fixed;right:16px;bottom:44px;z-index:6;display:flex;flex-direction:column;padding:4px;gap:2px}
+#zoom button{width:36px;height:36px;border-radius:9px;font-size:18px;font-weight:600;line-height:1;color:var(--mut)}
+#zoom button:hover{background:rgba(255,255,255,.08);color:var(--txt)}
+
+/* modo miniatura: só o 3D */
+html.limpo body>*:not(canvas){display:none!important}
+html.limpo body::before,html.limpo body::after{display:none}

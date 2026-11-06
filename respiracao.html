@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Respiração</title>
+<script>
+if(window.top===window){location.replace('index.html#respiracao'+location.search);}
+if(/[?&]limpo/.test(location.search))document.documentElement.classList.add('limpo');
+</script>
+<link rel="stylesheet" href="ui.css">
+<style>
+#partes{position:fixed;left:16px;top:calc(var(--top) + 12px);bottom:16px;width:240px;z-index:5;display:flex;flex-direction:column;overflow:hidden}
+#partes .lst{overflow:auto;padding:6px 8px 10px;flex:1;scrollbar-width:thin}
+.grp{border-bottom:1px solid var(--line)}.grp:last-child{border-bottom:0}
+.gh{display:flex;align-items:center;justify-content:space-between;width:100%;padding:10px 8px;font-weight:600;font-size:12.5px}
+.gh span.c{font-size:11px;color:var(--dim);margin-left:6px}
+.gh i{font-style:normal;color:var(--dim);transition:transform .2s}
+.grp.fechado .gh i{transform:rotate(-90deg)}.grp.fechado .rows{display:none}
+.row{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:9px;font-size:12.8px;line-height:1.25;color:var(--mut)}
+.row:hover{background:rgba(255,255,255,.06);color:var(--txt)}
+.row.on{background:rgba(255,218,0,.12);color:var(--txt);box-shadow:inset 0 0 0 1px rgba(255,218,0,.4)}
+.row .dot{width:10px;height:10px;border-radius:50%;flex:none}
+.row .nm{flex:1;cursor:pointer}
+.row .eye{width:26px;height:22px;border-radius:7px;opacity:.55;display:grid;place-items:center}
+.row .eye:hover{background:rgba(255,255,255,.1);opacity:1}
+.row.off .nm,.row.off .dot{opacity:.35}
+.eye svg{width:15px;height:15px}
+#tools{position:fixed;right:16px;top:calc(var(--top) + 12px);width:224px;z-index:6;padding:4px 14px 14px;transition:opacity .25s,transform .25s}
+#tools .ttl{display:block;margin:12px 0 7px}
+body.comcard #tools{opacity:0;pointer-events:none;transform:translateX(20px)}
+/* medidor */
+#medidor{position:fixed;right:256px;top:calc(var(--top) + 12px);z-index:5;width:66px;padding:10px 8px;display:flex;flex-direction:column;align-items:center;gap:8px}
+#medidor .tb{width:22px;height:150px;border-radius:12px;background:rgba(255,255,255,.08);position:relative;overflow:hidden}
+#medidor .tb i{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(0deg,#8D51FE,#FD924E,#FFDA00);border-radius:12px;height:0}
+#medidor b{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);text-align:center;line-height:1.2}
+#medidor span{font-weight:900;font-size:15px}
+body.comcard #medidor{right:372px}
+/* cenas */
+#cenas{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:6;padding:10px 12px 12px;display:flex;flex-direction:column;gap:9px;width:min(780px,calc(100vw - 560px));min-width:560px}
+#cenas .topo{display:flex;align-items:center;gap:10px;min-height:38px}
+#fase{flex:none;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;border-radius:9px;background:var(--grad);color:#fff;min-width:118px;text-align:center}
+#fase.exp{background:rgba(255,255,255,.12)}#fase.erro{background:#E5484D}
+#cap{flex:1;font-size:12.5px;color:var(--mut);line-height:1.4}
+#certo{flex:none;display:none}
+#certo.on{background:#2BB673;color:#fff}
+#cenas .seg button{padding:9px 6px;font-size:12.5px}
+#cenas .seg button.on{background:var(--grad);color:#fff}
+#cenas .sub{display:flex;gap:10px;align-items:center}
+#play{flex:none;min-width:116px}
+/* modo comparar */
+#cols{position:fixed;left:0;right:0;top:calc(var(--top) + 12px);display:none;z-index:5;pointer-events:none}
+body.comparar #cols{display:grid;grid-template-columns:repeat(3,1fr)}
+body.comparar #partes,body.comparar #tools,body.comparar #medidor{display:none}
+.col{padding:0 18px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px}
+.col .tt{display:flex;align-items:center;gap:8px;font-weight:900;font-size:22px;text-transform:uppercase;letter-spacing:-.02em}
+.col .tt i{font-style:normal;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:17px;background:rgba(255,255,255,.1)}
+.col .ps{font-size:12.5px;color:var(--mut);max-width:300px;line-height:1.4}
+.col .ps b{color:var(--acc);font-weight:600}
+.col .sel{display:inline-block;margin-top:2px;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:4px 9px;border-radius:8px}
+.col .ok{background:#2BB673;color:#fff}.col .mid{background:rgba(255,255,255,.14)}.col .no{background:#E5484D;color:#fff}
+.col .ver{pointer-events:auto;margin-top:4px}
+#compara{position:fixed;left:50%;transform:translateX(-50%);bottom:150px;z-index:5;display:none;padding:10px 14px;gap:0}
+body.comparar #compara{display:grid;grid-template-columns:150px repeat(3,1fr);width:min(760px,calc(100vw - 32px))}
+#compara div{font-size:12px;padding:5px 8px;color:var(--mut);border-bottom:1px solid var(--line);text-align:center}
+#compara div.h{text-align:left;color:var(--dim);font-weight:600;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center}
+#compara .bar{display:inline-block;height:7px;border-radius:4px;background:var(--grad);vertical-align:middle}
+#compara .bar.r{background:#E5484D}
+.colmeter{width:60%;height:8px;border-radius:5px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:4px}
+.colmeter i{display:block;height:100%;background:linear-gradient(90deg,#8D51FE,#FD924E,#FFDA00);width:0}
+.mbtn{display:none}
+@media (max-width:1100px){
+  #partes{display:none}#partes.open{display:flex;top:auto;bottom:0;left:0;right:0;width:auto;height:62vh;border-radius:20px 20px 0 0;z-index:12}
+  .mbtn{display:block;position:fixed;top:calc(var(--top) + 12px);z-index:7;padding:8px 13px;font-weight:600;font-size:12.5px}
+  #btnPartes{left:16px}
+  #cenas{min-width:0;width:calc(100vw - 32px)}
+  #medidor{right:16px;top:auto;bottom:190px}
+}
+@media (max-width:760px){
+  #btnAjustes{right:16px}#tools{display:none}#tools.open{display:block;top:auto;bottom:0;left:0;right:0;width:auto;border-radius:20px 20px 0 0;z-index:12}
+  #cenas{left:10px;right:10px;width:auto;transform:none;bottom:10px;padding:8px}
+  #cenas .seg{overflow-x:auto;scrollbar-width:none}#cenas .seg button{flex:none;padding:8px 10px;font-size:11.5px}
+  #cap{font-size:11.5px}
+  .card{left:10px;right:10px;width:auto;top:auto;bottom:10px;max-height:62vh;transform:translateY(115%)}.card.on{transform:none}
+  .col .ps,.col .sel{display:none}.col .tt{font-size:14px}.col .tt i{display:none}
+  #compara{display:none!important}
+  .cred{display:none}
+}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="tip"></div>
+<div id="hint" class="toast panel"><b>Arraste</b> pra girar · <b>role</b> pro zoom · <b>clique</b> numa parte</div>
+<button id="btnPartes" class="panel mbtn">☰ Partes</button>
+<button id="btnAjustes" class="panel mbtn">⚙ Ajustes</button>
+<aside id="partes" class="panel"><div class="ph"><b>Partes</b><small>clique pra estudar</small></div><div class="lst"></div></aside>
+<aside id="tools" class="panel">
+  <span class="ttl">Vista</span>
+  <div class="grid2" id="segVista"><button data-v="frente">Frente</button><button data-v="lado">Lado</button><button data-v="tras">Trás</button><button data-v="tres">3/4</button></div>
+  <span class="ttl">Corte</span>
+  <div class="seg" id="segCorte"><button data-c="" class="on">Inteiro</button><button data-c="meio">Ao meio</button></div>
+  <span class="ttl">Velocidade</span>
+  <input id="vel" type="range" min="0" max="100" value="45">
+  <span class="ttl">Mostrar</span>
+  <div class="sw-row"><span>Setas do movimento</span><button id="tgSetas" class="sw on"></button></div>
+  <div class="sw-row"><span>Ar</span><button id="tgAr" class="sw on"></button></div>
+  <div class="sw-row"><span>Ossos</span><button id="tgOssos" class="sw on"></button></div>
+</aside>
+<div id="medidor" class="panel"><b>Ar nos pulmões</b><div class="tb"><i id="medI"></i></div><span id="medN">0%</span></div>
+
+<div id="cols"></div>
+<div id="compara" class="panel"></div>
+
+<div id="card" class="card panel">
+  <button class="x" aria-label="Fechar">×</button>
+  <span class="tag"></span><h2></h2>
+  <p class="oq"></p>
+  <div class="box b1"><b></b><p></p></div>
+  <div class="box b2"><b></b><p></p></div>
+  <div class="acts"><button class="btn pri go"></button><button class="btn" id="btnTudo">Mostrar tudo</button></div>
+</div>
+
+<div id="cenas" class="panel">
+  <div class="topo"><span id="fase">Inspiração</span><span id="cap"></span><button class="btn" id="certo">✓ Ver o certo</button></div>
+  <div class="seg" id="segCena">
+    <button data-c="ciclo" class="on">Inspiração e expiração</button><button data-c="apoio">Apoio no canto</button><button data-c="tipos">Os 3 tipos</button><button data-c="desInsp">Desajuste inspiratório</button><button data-c="desExp">Desajuste expiratório</button>
+  </div>
+</div>
+<div id="zoom" class="panel"><button id="zMais" title="Aproximar">+</button><button id="zMenos" title="Afastar">−</button><button id="zCentro" title="Voltar ao início">⟲</button></div>
+<div class="cred">Modelo 3D: BodyParts3D, © The Database Center for Life Science · CC BY-SA 2.1 JP · pulmões gerados a partir das costelas e do diafragma</div>
+
+<script src="resp-modelo.js"></script>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+const Q=new URLSearchParams(location.search);
+const V=(x,y,z)=>new THREE.Vector3(x,y,z), VA=a=>new THREE.Vector3(a[0],a[1],a[2]);
+const clamp=(x,a,b)=>Math.min(b,Math.max(a,x)), lerp=(a,b,t)=>a+(b-a)*t;
+const sstep=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
+const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+const M=window.RESP_MODELO;
+
+/* ---------- cena ---------- */
+const canvas=document.getElementById('c');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,preserveDrawingBuffer:Q.has('shot')});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.95;renderer.localClippingEnabled=true;
+const scene=new THREE.Scene();scene.environment=new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(),.04).texture;
+const camera=new THREE.PerspectiveCamera(30,1,1,2000);
+const controls=new OrbitControls(camera,canvas);
+controls.enableDamping=true;controls.dampingFactor=.09;controls.zoomToCursor=true;controls.zoomSpeed=.85;controls.rotateSpeed=.75;controls.minDistance=20;controls.maxDistance=400;controls.screenSpacePanning=true;
+const TARGET0=V(0,-3,1);
+const VIEWS={frente:V(0,.12,1),lado:V(-1,.12,0),tras:V(0,.12,-1),tres:V(-.62,.22,.78)};
+const DIST=()=>innerWidth<innerHeight?320:205;
+camera.position.copy(TARGET0).addScaledVector(VIEWS.tres.clone().normalize(),DIST());controls.target.copy(TARGET0);
+scene.add(new THREE.HemisphereLight(0xffffff,0x2a1850,.6));
+const k1=new THREE.DirectionalLight(0xffffff,1.7);k1.position.set(-40,80,90);scene.add(k1);
+const k2=new THREE.DirectionalLight(0xb49bff,.7);k2.position.set(70,20,-40);scene.add(k2);
+const k3=new THREE.DirectionalLight(0xffb27a,.8);k3.position.set(-20,40,-90);scene.add(k3);
+const root=new THREE.Group();scene.add(root);
+
+/* ---------- partes ---------- */
+const GRUPOS=[['Músculos da respiração',['diafragma','intext','intint','obliquo','tt']],
+ ['Músculos acessórios',['escalenos','ecm','trapezio','levantador','peitoral','serratil']],
+ ['Vias aéreas',['pulmoes','bronquios','vias']],
+ ['Ossos e cartilagens',['costelas','cartilagens','esterno','claviculas','escapulas','coluna','pelve']]];
+const OSSOS=['costelas','cartilagens','esterno','claviculas','escapulas','coluna','pelve'];
+const INFO={
+ diafragma:{nome:'Diafragma',tag:'Músculo principal',kind:'musculo',cor:'#C2384A',
+  oq:'Músculo em forma de cúpula que separa o tórax do abdômen. Na inspiração ele contrai, desce e achata, abrindo espaço pros pulmões.',
+  canto:'É o principal músculo da inspiração. Na expiração ele relaxa e sobe devagar. O controle do ar no canto vem do equilíbrio entre ele e os abdominais.',act:['ciclo','Ver ele descendo']},
+ intext:{nome:'Intercostais externos',tag:'Músculo da inspiração',kind:'musculo',cor:'#B8404E',
+  oq:'Entre as costelas, com fibras inclinadas pra frente e pra baixo. Ao contrair, sobem e abrem as costelas.',
+  canto:'Mantêm as costelas abertas durante a frase: fazem parte do apoio.',act:['apoio','Ver o apoio']},
+ intint:{nome:'Intercostais internos',tag:'Músculo da expiração',kind:'musculo',cor:'#9E2E3C',
+  oq:'Por baixo dos externos, com fibras no sentido contrário. Abaixam e fecham as costelas.',
+  canto:'Músculo da expiração ativa. Usado demais, fecha a caixa de uma vez e o ar sai num empurrão.',act:['desExp','Ver o desajuste']},
+ obliquo:{nome:'Oblíquo externo',tag:'Abdominal',kind:'musculo',cor:'#C04A55',
+  oq:'O maior músculo da parede lateral da barriga. Com o oblíquo interno, o transverso e o reto abdominal (que não estão neste modelo), forma a parede abdominal.',
+  canto:'Na inspiração relaxa e deixa a barriga sair. No canto, contrai aos poucos e empurra o ar de forma controlada: é o motor da expiração do canto.',act:['apoio','Ver o apoio']},
+ tt:{nome:'Transverso do tórax',tag:'Músculo da expiração',kind:'musculo',cor:'#A03440',
+  oq:'Músculo fino por dentro do esterno, ligado às cartilagens das costelas.',
+  canto:'Puxa as costelas pra baixo na expiração forçada.',act:['desExp','Ver a expiração forçada']},
+ escalenos:{nome:'Escalenos',tag:'Acessório da inspiração',kind:'musculo',cor:'#D25563',
+  oq:'Três músculos (anterior, médio e posterior) que vão das vértebras do pescoço até as duas primeiras costelas.',
+  canto:'Erguem as primeiras costelas. Na respiração alta, trabalham demais e deixam o pescoço tenso, bem perto da laringe.',act:['desInsp','Ver o desajuste']},
+ ecm:{nome:'Esternocleidomastoideo',tag:'Acessório da inspiração',kind:'musculo',cor:'#D25563',
+  oq:'Do osso atrás da orelha até o esterno e a clavícula.',
+  canto:'Quando ele salta no pescoço na hora de puxar o ar, é sinal de respiração alta. Essa tensão chega na laringe e aperta a voz.',act:['desInsp','Ver o desajuste']},
+ trapezio:{nome:'Trapézio',tag:'Acessório da inspiração',kind:'musculo',cor:'#BE4A58',
+  oq:'Grande músculo das costas e dos ombros.',
+  canto:'A parte de cima sobe os ombros. Ombro subindo na inspiração é respiração alta.',act:['desInsp','Ver os ombros subindo']},
+ levantador:{nome:'Levantador da escápula',tag:'Acessório',kind:'musculo',cor:'#BE4A58',
+  oq:'Do pescoço até a ponta de cima da escápula.',
+  canto:'Junto com o trapézio, sobe os ombros. Tensão aqui costuma vir junto com tensão na voz.',act:['desInsp','Ver o desajuste']},
+ peitoral:{nome:'Peitoral menor',tag:'Acessório da inspiração',kind:'musculo',cor:'#C85060',
+  oq:'Das costelas (3ª a 5ª) até a escápula.',
+  canto:'Com os ombros parados, ajuda a puxar as costelas pra cima quando falta ar. É reserva, não o motor.',act:['desInsp','Ver o desajuste']},
+ serratil:{nome:'Serrátil anterior',tag:'Acessório',kind:'musculo',cor:'#C85060',
+  oq:'Das costelas da lateral até a escápula, em forma de dedos.',
+  canto:'Pode ajudar a erguer as costelas no esforço. No canto, ombros soltos deixam ele quieto.'},
+ pulmoes:{nome:'Pulmões',tag:'Órgão',kind:'pulmao',cor:'#F09AAA',
+  oq:'Não têm músculo: não se enchem sozinhos. Ficam colados por dentro das costelas e em cima do diafragma e acompanham o movimento deles. (Forma reconstruída pra este modelo.)',
+  canto:'Quem enche o pulmão é o espaço que o diafragma e as costelas abrem. Por isso “puxar” o ar com força não adianta: o segredo é abrir espaço.',act:['ciclo','Ver enchendo']},
+ bronquios:{nome:'Brônquios',tag:'Via aérea',kind:'via',cor:'#F6D2C8',
+  oq:'A traqueia se divide em dois brônquios, que se ramificam como uma árvore dentro de cada pulmão.',
+  canto:'O ar que vira som saiu lá do fundo dessas ramificações.',act:['ciclo','Ver o ar passando']},
+ vias:{nome:'Traqueia',tag:'Via aérea',kind:'via',cor:'#D7E2E7',
+  oq:'Tubo de anéis de cartilagem que leva o ar da laringe até os brônquios.',
+  canto:'É por aqui que o ar sobe até as pregas vocais. A pressão desse ar embaixo das pregas é a pressão subglótica.',act:['apoio','Ver o ar saindo devagar']},
+ costelas:{nome:'Costelas',tag:'Osso',kind:'osso',cor:'#EDE3CC',
+  oq:'12 pares. Giram nas articulações com a coluna: as de cima sobem pra frente (como braço de bomba) e as de baixo abrem pros lados (como alça de balde).',
+  canto:'Abrir as costelas pros lados é a respiração média. Mantê-las abertas enquanto canta ajuda a controlar a saída do ar.',act:['tipos','Ver os 3 tipos']},
+ cartilagens:{nome:'Cartilagens costais',tag:'Cartilagem',kind:'cart',cor:'#C9D6DD',
+  oq:'Ligam as costelas ao esterno. São flexíveis e deixam a caixa torácica se mexer.',canto:'Dão a flexibilidade que deixa o peito abrir sem esforço.'},
+ esterno:{nome:'Esterno',tag:'Osso',kind:'osso',cor:'#EDE3CC',
+  oq:'O osso do meio do peito, onde as costelas se ligam pela frente.',canto:'Sobe e vai pra frente na inspiração, levado pelas costelas.'},
+ claviculas:{nome:'Clavículas',tag:'Osso',kind:'osso',cor:'#EDE3CC',
+  oq:'Ligam o esterno aos ombros.',canto:'Clavícula subindo na inspiração é o sinal mais visível da respiração alta.',act:['desInsp','Ver subindo']},
+ escapulas:{nome:'Escápulas',tag:'Osso',kind:'osso',cor:'#EDE3CC',
+  oq:'Os ossos chatos das costas, as “asas”.',canto:'Ombros e escápulas devem ficar soltos e quietos na respiração do canto.'},
+ coluna:{nome:'Coluna',tag:'Osso',kind:'osso',cor:'#E6DCC4',
+  oq:'Vértebras torácicas e lombares, onde as costelas se apoiam atrás.',canto:'Postura alinhada deixa as costelas e o diafragma livres pra trabalhar.'},
+ pelve:{nome:'Pelve',tag:'Osso',kind:'osso',cor:'#E6DCC4',
+  oq:'Base do tronco, onde os abdominais se prendem embaixo.',canto:'A base que sustenta o trabalho dos abdominais.'},
+};
+const KIND={
+  osso:{roughness:.62,clearcoat:.15},cart:{roughness:.35,clearcoat:.5},
+  musculo:{roughness:.5,clearcoat:.3,clearcoatRoughness:.4},
+  pulmao:{roughness:.45,clearcoat:.4,opacity:.62},via:{roughness:.35,clearcoat:.5},
+};
+const P={};for(const [id,i] of Object.entries(INFO))P[id]={id,...i,meshes:[],mats:[],visible:true};
+const cutU={value:0}, clipPlanes=[];
+function makeMat(p){
+  const o=KIND[p.kind];const m=new THREE.MeshPhysicalMaterial({...o,color:new THREE.Color(p.cor),side:THREE.DoubleSide,clippingPlanes:clipPlanes,transparent:(o.opacity??1)<1,depthWrite:(o.opacity??1)>=.6});
+  m.userData.base=o.opacity??1;m.userData.cap=new THREE.Color(p.cor).multiplyScalar(.78);
+  m.onBeforeCompile=sh=>{sh.uniforms.uCap={value:m.userData.cap};sh.uniforms.uCut=cutU;
+    sh.fragmentShader='uniform vec3 uCap;\nuniform float uCut;\n'+sh.fragmentShader.replace('#include <dithering_fragment>','#include <dithering_fragment>\nif(uCut>0.5 && !gl_FrontFacing){ gl_FragColor.rgb = uCap; }');};
+  return m;
+}
+
+/* ---------- esqueleto ---------- */
+const bones=M.bones.map(()=>new THREE.Bone());
+const BI={};M.bones.forEach((n,i)=>BI[n]=i);
+M.bones.forEach((n,i)=>{const inf=M.boneInfo[n];if(inf)bones[i].position.copy(VA(inf.pivot));root.add(bones[i]);});
+root.updateMatrixWorld(true);
+const skeleton=new THREE.Skeleton(bones);
+const b64=(s,T)=>{const bin=atob(s);const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return T===Uint8Array?u:new T(u.buffer);};
+const MORPH={};
+for(const mm of M.meshes){
+  const p=P[mm.part];if(!p)continue;
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.BufferAttribute(b64(mm.pos,Float32Array),3));
+  g.setIndex(new THREE.BufferAttribute(b64(mm.idx,mm.big?Uint32Array:Uint16Array),1));
+  const si8=b64(mm.si,Uint8Array),sw8=b64(mm.sw,Uint8Array);const n=mm.nv;
+  g.setAttribute('skinIndex',new THREE.Uint16BufferAttribute(Uint16Array.from(si8),4));
+  const sw=new Float32Array(n*4);for(let i=0;i<n;i++){const w=sw8[i]/255;sw[i*4]=w;sw[i*4+1]=1-w;}
+  g.setAttribute('skinWeight',new THREE.BufferAttribute(sw,4));
+  if(mm.morph){g.morphAttributes.position=[];g.morphTargetsRelative=true;
+    for(const [k,v] of Object.entries(mm.morph)){const a=new THREE.BufferAttribute(b64(v,Float32Array),3);a.name=k;g.morphAttributes.position.push(a);}}
+  g.computeVertexNormals();
+  const mat=makeMat(p);const mesh=new THREE.SkinnedMesh(g,mat);mesh.frustumCulled=false;mesh.userData.part=mm.part;
+  root.add(mesh);mesh.bind(skeleton,new THREE.Matrix4());
+  if(mm.morph){mesh.updateMorphTargets();(MORPH[mm.part]=MORPH[mm.part]||[]).push(mesh);}
+  p.meshes.push(mesh);p.mats.push(mat);
+}
+// proxies parados pra clique (mais leves que malha com pele)
+const PICK=[];for(const p of Object.values(P))for(const m of p.meshes){const pm=new THREE.Mesh(m.geometry,new THREE.MeshBasicMaterial({visible:false}));pm.userData.part=p.id;pm.userData.real=m;root.add(pm);PICK.push(pm);}
+
+/* ---------- ossos: sinais e pontos ---------- */
+const RIB={};
+for(const s of ['R','L'])for(let i=1;i<=12;i++){
+  const n=`rib${s}${i}`,inf=M.boneInfo[n];const ax=VA(inf.axis).normalize(),pv=VA(inf.pivot),ant=VA(inf.ant).sub(pv);
+  const t=ant.clone().applyAxisAngle(ax,.05);const sign=t.y>ant.y?1:-1;
+  RIB[n]={ax,pv,ant,sign,i,s};
+}
+const CLAV={};for(const s of ['R','L']){const inf=M.boneInfo['clav'+s];const pv=VA(inf.pivot),lat=VA(inf.lat).sub(pv);const ax=V(0,0,1);const t=lat.clone().applyAxisAngle(ax,.05);CLAV[s]={pv,ax,sign:t.y>lat.y?1:-1};}
+
+/* ---------- estado da respiração ---------- */
+// dia: diafragma desce | cost: costelas abrem (negativo = fecham além do repouso) | alta: ombros/clavículas/1ª costelas | abd: barriga sai (+) ou entra (-)
+const S={dia:0,cost:0,alta:0,abd:0};
+const q=new THREE.Quaternion();
+function pose(st){
+  for(const n in RIB){const r=RIB[n];const i=r.i;
+    const ang=(st.cost*(.035+.0055*i)+st.alta*Math.max(0,.13-.03*(i-1)))*r.sign;
+    q.setFromAxisAngle(r.ax,ang);bones[BI[n]].quaternion.copy(q);}
+  // esterno acompanha as costelas 2 a 6
+  const d=V(0,0,0);let c=0;for(const s of ['R','L'])for(let i=2;i<=6;i++){const r=RIB[`rib${s}${i}`];const a=r.ant.clone().applyQuaternion(bones[BI[`rib${s}${i}`]].quaternion);d.add(a.sub(r.ant));c++;}
+  d.multiplyScalar(1/c);bones[BI.sterno].position.copy(VA(M.boneInfo.sterno.pivot)).add(d);
+  for(const s of ['R','L']){const cl=CLAV[s];q.setFromAxisAngle(cl.ax,st.alta*.2*cl.sign);const b=bones[BI['clav'+s]];b.quaternion.copy(q);b.position.copy(cl.pv).add(V(0,st.alta*.6,st.alta*.3));
+    const sc=bones[BI['scap'+s]];sc.position.copy(VA(M.boneInfo['scap'+s].pivot)).add(V(0,st.alta*1.8,st.alta*.2));}
+  const set=(part,name,v)=>{for(const m of MORPH[part]||[]){const k=m.morphTargetDictionary[name];if(k!==undefined)m.morphTargetInfluences[k]=v;}};
+  set('diafragma','contrai',st.dia);set('pulmoes','baixa',st.dia);set('pulmoes','alta',st.alta);
+  set('obliquo','fora',Math.max(0,st.abd));set('obliquo','dentro',Math.max(0,-st.abd));
+}
+const volume=st=>clamp(.58*Math.max(0,st.dia)+.3*Math.max(-1,st.cost)+.12*st.alta+.04*st.abd,0,1);
+
+/* ---------- cenas ---------- */
+// cada cena: duração do ciclo (s) e função f(p) -> estado + fase + foco
+const ins=(p,a)=>p<a?ease(p/a):1-ease((p-a)/(1-a));
+const CENAS={
+ ciclo:{dur:7,f:p=>{const v=ins(p,.42);const up=p<.42;return {st:{dia:v,cost:.55*v,alta:0,abd:.7*v},fase:up?'Inspiração':'Expiração',cls:up?'':'exp',
+   cap:up?'O diafragma contrai e desce, as costelas sobem e abrem, a barriga sai. O espaço aumenta e o ar entra sozinho.':'Expiração tranquila: tudo relaxa e volta pela elasticidade. O ar sai sem esforço nenhum.',
+   foco:up?{diafragma:'ok',intext:'ok'}:{}};}},
+ apoio:{dur:11,f:p=>{let st,fase,cap,foco,cls='';
+   if(p<.22){const v=ease(p/.22);st={dia:v,cost:.75*v,alta:0,abd:.7*v};fase='Inspiração';cap='Inspira baixo e abre as costelas: o tanque enche.';foco={diafragma:'ok',intext:'ok'};}
+   else{const t=(p-.22)/.78;const v=1-t;st={dia:Math.max(0,1-1.15*t),cost:.75*(1-.35*t*t),alta:0,abd:lerp(.7,-.85,sstep(0,.85,t))};fase='Canto (apoio)';cls='exp';
+     cap='Enquanto canta, as costelas continuam abertas e os abdominais entram devagar. O ar sai em fio, constante: a pressão embaixo das pregas fica estável.';foco={obliquo:'ok',intext:'ok'};}
+   return {st,fase,cap,foco,cls};}},
+ tipos:{dur:6,tipos:true,f:p=>({st:{dia:0,cost:0,alta:0,abd:0},fase:p<.45?'Inspiração':'Expiração',cls:p<.45?'':'exp',cap:'Compare: onde cada respiração se mexe, quanto ar entra e onde aparece a tensão. Clique num tipo pra ver de perto.',foco:{}})},
+ desInsp:{dur:6,certo:'ciclo',f:p=>{const v=ins(p,.4);const up=p<.4;return {st:{dia:.12*v,cost:.1*v,alta:v,abd:-.25*v},fase:up?'Inspiração alta':'Expiração',cls:up?'erro':'exp',
+   cap:'O ar é puxado de cima: ombros e clavículas sobem, o pescoço trabalha e o diafragma quase não desce. Entra pouco ar e a tensão chega na laringe.',
+   foco:up?{escalenos:'erro',ecm:'erro',trapezio:'erro',levantador:'erro',peitoral:'erro'}:{}};}},
+ desExp:{dur:6.5,certo:'apoio',f:p=>{let st,fase,cap,foco,cls;
+   if(p<.3){const v=ease(p/.3);st={dia:v,cost:.6*v,alta:0,abd:.6*v};fase='Inspiração';cls='';cap='Inspira normal…';foco={diafragma:'ok'};}
+   else{const t=(p-.3)/.7;const k=ease(clamp(t/.28,0,1));st={dia:lerp(1,-.35,k),cost:lerp(.6,-.7,k),alta:0,abd:lerp(.6,-1.25,k)};fase='Empurrando';cls='erro';
+     cap='…e empurra: abdominais e intercostais internos fecham tudo de uma vez. O ar sai num jato, a pressão embaixo das pregas explode: voz dura, apertada e cansaço.';foco={obliquo:'erro',intint:'erro',tt:'erro'};}
+   return {st,fase,cap,foco,cls};}},
+};
+const TIPOS=[
+ {id:'alta',nome:'Alta',ic:'⚠',sel:['no','Evite no canto'],ps:'<b>Pra que serve:</b> emergência e esforço (ofegar, susto). É reserva do corpo.',
+  f:v=>({dia:.12*v,cost:.12*v,alta:v,abd:-.2*v}),foco:{escalenos:'erro',ecm:'erro',trapezio:'erro',levantador:'erro',peitoral:'erro'},
+  card:{tag:'Respiração alta · clavicular',nome:'Respiração alta',oq:'O ar é puxado com os músculos do pescoço e dos ombros. Ombros e clavículas sobem; a barriga às vezes até entra.',
+   b1:['Pra que serve','Emergência e esforço: ofegar depois de correr, susto, falta de ar. É a reserva do corpo.'],b2:['No canto','Evite. Entra pouco ar, gasta muito esforço e a tensão do pescoço chega na laringe e aperta a voz.']}},
+ {id:'media',nome:'Média',ic:'💬',sel:['mid','Ajuda no apoio'],ps:'<b>Pra que serve:</b> o dia a dia, falar e andar. No canto, dá estabilidade.',
+  f:v=>({dia:.3*v,cost:v,alta:0,abd:.1*v}),foco:{intext:'ok'},
+  card:{tag:'Respiração média · costal / intercostal',nome:'Respiração média',oq:'As costelas abrem pros lados e pra frente, puxadas pelos intercostais externos. O diafragma desce um pouco.',
+   b1:['Pra que serve','O dia a dia: falar, andar, atividades leves.'],b2:['No canto','Costelas abertas e estáveis dão firmeza ao apoio. Use junto com a respiração baixa.']}},
+ {id:'baixa',nome:'Baixa',ic:'♪',sel:['ok','A base do canto'],ps:'<b>Pra que serve:</b> repouso e canto. Mais ar com menos esforço.',
+  f:v=>({dia:v,cost:.25*v,alta:0,abd:.95*v}),foco:{diafragma:'ok',obliquo:'ok'},
+  card:{tag:'Respiração baixa · diafragmática / abdominal',nome:'Respiração baixa',oq:'O diafragma desce e empurra as vísceras: a barriga e a cintura se expandem. Ombros e pescoço ficam quietos.',
+   b1:['Pra que serve','É a mais eficiente: mais ar com menos esforço. É a do repouso e do sono.'],b2:['No canto','É a base. Pescoço e laringe livres pras frases longas.']}},
+];
+
+/* ---------- foco (brilho) ---------- */
+const COR_OK=new THREE.Color('#FFDA00'),COR_ERRO=new THREE.Color('#FF2E4D');
+function aplicaFoco(foco,pulse,ghost){
+  const temFoco=Object.keys(foco).length>0;
+  for(const p of Object.values(P)){
+    const f=foco[p.id];const isM=p.kind==='musculo';
+    p.mats.forEach(m=>{
+      if(f){m.emissive.copy(f==='erro'?COR_ERRO:COR_OK).multiplyScalar(f==='erro'?.18+.22*pulse:.08+.12*pulse);}else m.emissive.setRGB(0,0,0);
+      let o=m.userData.base;if(sel&&sel!==p.id)o*=.12;else if(ghost&&temFoco&&isM&&!f)o*=.18;
+      if(m.opacity!==o){m.opacity=o;const tr=o<.999;if(m.transparent!==tr){m.transparent=tr;m.needsUpdate=true;}m.depthWrite=o>.6;}
+    });
+  }
+}
+
+/* ---------- setas ---------- */
+function seta(cor){const g=new THREE.Group();const mat=new THREE.MeshBasicMaterial({color:cor,transparent:true,depthTest:false,opacity:.9});
+  const cil=new THREE.Mesh(new THREE.CylinderGeometry(.45,.45,5,12),mat);cil.position.y=2.5;const cone=new THREE.Mesh(new THREE.ConeGeometry(1.3,2.8,16),mat);cone.position.y=6.2;
+  g.add(cil,cone);g.renderOrder=10;cil.renderOrder=cone.renderOrder=10;g.userData.mat=mat;root.add(g);return g;}
+const L=M.L;
+const pontos={dia:V(0,1.2,1),costR:V(-15,2,0),costL:V(15,2,0),sterno:V(0,8,11.5),abd:V(0,-10,13),ombR:V(-15,17,-2),ombL:V(15,17,-2)};
+const SETAS={dia:seta('#FFDA00'),costR:seta('#FFDA00'),costL:seta('#FFDA00'),sterno:seta('#FFDA00'),abd:seta('#FFDA00'),ombR:seta('#FF2E4D'),ombL:seta('#FF2E4D')};
+const DIRS={dia:V(0,-1,0),costR:V(-1,.3,0),costL:V(1,.3,0),sterno:V(0,.6,1),abd:V(0,0,1),ombR:V(0,1,0),ombL:V(0,1,0)};
+const up=V(0,1,0);
+function poeSeta(k,vel,on){const s=SETAS[k];const a=clamp(Math.abs(vel)*1.6,0,1);s.visible=on&&a>.06;if(!s.visible)return;
+  const d=DIRS[k].clone().normalize().multiplyScalar(Math.sign(vel)||1);s.quaternion.setFromUnitVectors(up,d);s.position.copy(pontos[k]).addScaledVector(d,-2);
+  s.scale.setScalar(.6+.6*a);s.userData.mat.opacity=.35+.6*a;}
+
+/* ---------- ar ---------- */
+const NP=320,aPos=new Float32Array(NP*3),AR=[];const TOP=VA(L.traqTopo),CAR=VA(L.carina),TIPS=L.pontas.map(VA);
+for(let i=0;i<NP;i++)AR.push({s:Math.random(),tip:TIPS[i%TIPS.length],o:V(Math.random()-.5,Math.random()-.5,Math.random()-.5).multiplyScalar(.9)});
+const aGeo=new THREE.BufferGeometry();aGeo.setAttribute('position',new THREE.BufferAttribute(aPos,3));
+const ar=new THREE.Points(aGeo,new THREE.PointsMaterial({color:0xFFDA00,size:.7,transparent:true,opacity:.95,depthWrite:false,depthTest:false,clippingPlanes:clipPlanes}));ar.renderOrder=6;root.add(ar);
+function stepAr(flow,dt){const k=flow*dt*1.1;
+  for(let i=0;i<NP;i++){const a=AR[i];a.s+=k*(.7+.6*((i*37)%10)/10);
+    if(a.s>1){a.s-=1;a.tip=TIPS[(Math.random()*TIPS.length)|0];}if(a.s<0){a.s+=1;a.tip=TIPS[(Math.random()*TIPS.length)|0];}
+    let p;if(a.s<.4)p=TOP.clone().lerp(CAR,a.s/.4);else p=CAR.clone().lerp(a.tip,(a.s-.4)/.6);
+    const spread=a.s<.4?.35:1.2*((a.s-.4)/.6);p.addScaledVector(a.o,spread);
+    aPos[i*3]=p.x;aPos[i*3+1]=p.y;aPos[i*3+2]=p.z;}
+  aGeo.attributes.position.needsUpdate=true;ar.material.opacity=clamp(.25+Math.abs(flow)*3,0,1);}
+
+/* ---------- interface ---------- */
+let cena=Q.get('cena')||'ciclo',certo=false,tempo=0,vel=.45,sel=null,showSetas=true,showAr=true;
+const capEl=document.getElementById('cap'),faseEl=document.getElementById('fase'),certoB=document.getElementById('certo');
+function setCena(c){cena=c;certo=false;tempo=0;certoB.classList.remove('on');certoB.textContent='✓ Ver o certo';
+  document.querySelectorAll('#segCena button').forEach(b=>b.classList.toggle('on',b.dataset.c===c));
+  certoB.style.display=CENAS[c].certo?'inline-flex':'none';
+  document.body.classList.toggle('comparar',!!CENAS[c].tipos);deselect();resize();
+  if(CENAS[c].tipos)flyTo(V(0,3,1).addScaledVector(V(0,.06,1).normalize(),innerWidth<innerHeight?210:118),V(0,3,1));
+  else if(c==='desInsp')flyTo(V(0,10,1).addScaledVector(V(-.35,.2,1).normalize(),DIST()*.82),V(0,10,1));
+}
+document.querySelectorAll('#segCena button').forEach(b=>b.onclick=()=>setCena(b.dataset.c));
+certoB.onclick=()=>{certo=!certo;certoB.classList.toggle('on',certo);certoB.textContent=certo?'✗ Ver o erro':'✓ Ver o certo';tempo=0;};
+document.getElementById('vel').oninput=e=>vel=e.target.value/100;
+document.getElementById('tgSetas').onclick=e=>{showSetas=!showSetas;e.currentTarget.classList.toggle('on',showSetas);};
+document.getElementById('tgAr').onclick=e=>{showAr=!showAr;e.currentTarget.classList.toggle('on',showAr);ar.visible=showAr;};
+let showOssos=true;document.getElementById('tgOssos').onclick=e=>{showOssos=!showOssos;e.currentTarget.classList.toggle('on',showOssos);for(const id of OSSOS){P[id].visible=showOssos;P[id].meshes.forEach(m=>m.visible=showOssos);}syncRows();};
+document.getElementById('btnAjustes').onclick=()=>document.getElementById('tools').classList.toggle('open');
+
+// lista
+const eyeOn='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+const eyeOff='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l18 18M10.6 5.1A10.8 10.8 0 0 1 12 5c7 0 11 7 11 7a18 18 0 0 1-3.2 4M6.6 6.6C3.4 8.6 1 12 1 12s4 7 11 7a10.6 10.6 0 0 0 5.4-1.5"/></svg>';
+const lista=document.getElementById('partes'),lst=lista.querySelector('.lst');
+GRUPOS.forEach(([g,ids],gi)=>{const grp=document.createElement('div');grp.className='grp'+(gi>1?' fechado':'');
+  grp.innerHTML=`<button class="gh"><span>${g}<span class="c">${ids.length}</span></span><i>▾</i></button><div class="rows"></div>`;
+  grp.querySelector('.gh').onclick=()=>grp.classList.toggle('fechado');lst.appendChild(grp);
+  for(const id of ids){const r=document.createElement('div');r.className='row';r.dataset.id=id;
+    r.innerHTML=`<span class="dot" style="background:${P[id].cor}"></span><span class="nm">${P[id].nome}</span><button class="eye">${eyeOn}</button>`;
+    r.querySelector('.nm').onclick=()=>select(id);
+    r.querySelector('.eye').onclick=e=>{e.stopPropagation();P[id].visible=!P[id].visible;P[id].meshes.forEach(m=>m.visible=P[id].visible);syncRows();};
+    grp.querySelector('.rows').appendChild(r);}});
+function syncRows(){document.querySelectorAll('.row').forEach(r=>{const v=P[r.dataset.id].visible;r.classList.toggle('off',!v);r.querySelector('.eye').innerHTML=v?eyeOn:eyeOff;});}
+document.getElementById('btnPartes').onclick=()=>lista.classList.toggle('open');
+
+// card
+const card=document.getElementById('card');
+function abreCard(tag,nome,oq,b1,b2,act){
+  card.querySelector('.tag').textContent=tag;card.querySelector('h2').textContent=nome;card.querySelector('.oq').textContent=oq;
+  const [x1,x2]=[card.querySelector('.b1'),card.querySelector('.b2')];
+  x1.style.display=b1?'':'none';if(b1){x1.querySelector('b').textContent=b1[0];x1.querySelector('p').textContent=b1[1];}
+  x2.style.display=b2?'':'none';if(b2){x2.querySelector('b').textContent=b2[0];x2.querySelector('p').textContent=b2[1];}
+  const go=card.querySelector('.go');if(act){go.style.display='';go.textContent='▶ '+act[1];go.onclick=()=>{setCena(act[0]);};}else go.style.display='none';
+  card.classList.add('on');document.body.classList.add('comcard');lista.classList.remove('open');
+}
+function select(id){const p=P[id];sel=id;document.querySelectorAll('.row').forEach(r=>{r.classList.toggle('on',r.dataset.id===id);if(r.dataset.id===id)r.closest('.grp').classList.remove('fechado');});
+  abreCard(p.tag,p.nome,p.oq,['No canto',p.canto],null,p.act);}
+function deselect(){sel=null;card.classList.remove('on');document.body.classList.remove('comcard');document.querySelectorAll('.row').forEach(r=>r.classList.remove('on'));}
+card.querySelector('.x').onclick=deselect;
+document.getElementById('btnTudo').onclick=()=>{deselect();flyTo(TARGET0.clone().addScaledVector(VIEWS.tres.clone().normalize(),DIST()),TARGET0.clone());};
+
+// colunas do comparar
+const cols=document.getElementById('cols');
+cols.innerHTML=TIPOS.map((t,i)=>`<div class="col"><div class="tt"><i>${t.ic}</i>${t.nome}</div><span class="sel ${t.sel[0]}">${t.sel[1]}</span><div class="ps">${t.ps}</div><div class="colmeter"><i id="cm${i}"></i></div><button class="btn ver" data-i="${i}">Ver de perto</button></div>`).join('');
+cols.querySelectorAll('.ver').forEach(b=>b.onclick=()=>{const t=TIPOS[+b.dataset.i];const c=t.card;abreCard(c.tag,c.nome,c.oq,c.b1,c.b2,null);});
+const nivel=(n,r)=>`<span class="bar ${r?'r':''}" style="width:${n*22}px"></span>`;
+document.getElementById('compara').innerHTML=`<div class="h">Ar que entra</div><div>${nivel(1)}</div><div>${nivel(2)}</div><div>${nivel(3)}</div>
+<div class="h">Esforço</div><div>${nivel(3,1)}</div><div>${nivel(2)}</div><div>${nivel(1)}</div>
+<div class="h">Tensão no pescoço</div><div>${nivel(3,1)}</div><div>${nivel(1)}</div><div>—</div>
+<div class="h">Quando usar</div><div>esforço, susto</div><div>dia a dia, apoio</div><div>repouso e canto</div>`;
+
+/* ---------- câmera, corte, zoom ---------- */
+let tween=null;function flyTo(p,t,d=1){tween={p0:camera.position.clone(),t0:controls.target.clone(),p1:p,t1:t,t:0,d};}
+controls.addEventListener('start',()=>tween=null);
+document.querySelectorAll('#segVista button').forEach(b=>b.onclick=()=>{flyTo(TARGET0.clone().addScaledVector(VIEWS[b.dataset.v].clone().normalize(),DIST()),TARGET0.clone());document.querySelectorAll('#segVista button').forEach(x=>x.classList.toggle('on',x===b));});
+const PLANO=new THREE.Plane(V(1,0,0),0);
+document.querySelectorAll('#segCorte button').forEach(b=>b.onclick=()=>{const c=b.dataset.c;clipPlanes.length=0;if(c)clipPlanes.push(PLANO);cutU.value=c?1:0;
+  for(const p of Object.values(P))p.mats.forEach(m=>m.needsUpdate=true);ar.material.needsUpdate=true;
+  document.querySelectorAll('#segCorte button').forEach(x=>x.classList.toggle('on',x===b));
+  if(c)flyTo(TARGET0.clone().addScaledVector(VIEWS.lado.clone().normalize(),DIST()),TARGET0.clone());});
+function zoomBy(f){const d=camera.position.clone().sub(controls.target);flyTo(controls.target.clone().addScaledVector(d.normalize(),clamp(d.length()*f,controls.minDistance,controls.maxDistance)),controls.target.clone(),.35);}
+document.getElementById('zMais').onclick=()=>zoomBy(.7);document.getElementById('zMenos').onclick=()=>zoomBy(1.4);
+document.getElementById('zCentro').onclick=()=>flyTo(TARGET0.clone().addScaledVector(VIEWS.tres.clone().normalize(),DIST()),TARGET0.clone());
+
+/* ---------- clique ---------- */
+const ray=new THREE.Raycaster(),mouse=new THREE.Vector2(),tip=document.getElementById('tip');let down=null;
+const hintEl=document.getElementById('hint');setTimeout(()=>hintEl.classList.add('off'),9000);
+function pick(e){if(document.body.classList.contains('comparar'))return null;const r=canvas.getBoundingClientRect();mouse.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(mouse,camera);
+  const h=ray.intersectObjects(PICK.filter(m=>m.userData.real.visible&&m.userData.real.material.opacity>.3),false).find(h=>!clipPlanes.some(pl=>pl.distanceToPoint(h.point)<0));return h?h.object.userData.part:null;}
+canvas.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY};hintEl.classList.add('off');});
+canvas.addEventListener('pointerup',e=>{if(down&&Math.hypot(e.clientX-down.x,e.clientY-down.y)<6){
+  if(document.body.classList.contains('comparar')){const i=Math.floor(e.clientX/innerWidth*3);const t=TIPOS[i];abreCard(t.card.tag,t.card.nome,t.card.oq,t.card.b1,t.card.b2,null);}
+  else{const id=pick(e);if(id)select(id);else if(sel)deselect();}}down=null;});
+let lm=0;canvas.addEventListener('pointermove',e=>{const n=performance.now();if(e.buttons||n-lm<140||e.pointerType!=='mouse')return;lm=n;const id=pick(e);canvas.classList.toggle('hov',!!id);
+  if(id){tip.textContent=P[id].nome;tip.style.left=e.clientX+'px';tip.style.top=e.clientY+'px';tip.style.opacity=1;}else tip.style.opacity=0;});
+
+/* ---------- loop ---------- */
+let TOPP=0,BOT=0;
+function resize(){renderer.setSize(innerWidth,innerHeight,false);const cmp=document.body.classList.contains('comparar');const mob=innerWidth<760;
+  TOPP=cmp?(mob?130:262):0;BOT=cmp?(mob?150:316):0;camera.aspect=(cmp?innerWidth/3:innerWidth)/(innerHeight-TOPP-BOT);camera.updateProjectionMatrix();}
+addEventListener('resize',resize);
+const medI=document.getElementById('medI'),medN=document.getElementById('medN');
+let lastVol=0,lastFase='';const clock=new THREE.Clock();
+function render(){
+  const dt=Math.min(clock.getDelta(),.05);if(!Q.has('pausa'))tempo+=dt*(.35+vel*1.3);
+  const C=CENAS[(certo&&CENAS[cena].certo)?CENAS[cena].certo:cena];const p=(tempo/C.dur)%1;const pulse=.5+.5*Math.sin(tempo*5);
+  if(tween){tween.t+=dt/tween.d;const t=Math.min(tween.t,1),e=t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;camera.position.lerpVectors(tween.p0,tween.p1,e);controls.target.lerpVectors(tween.t0,tween.t1,e);if(t>=1)tween=null;}
+  controls.update();
+  if(C.tipos){
+    const W=innerWidth,H=innerHeight;renderer.setScissorTest(true);const v=ins(p,.45);
+    const f=C.f(p);if(f.fase!==lastFase){lastFase=f.fase;faseEl.textContent=f.fase;faseEl.className=f.cls;capEl.textContent=f.cap;}
+    TIPOS.forEach((t,i)=>{const st=t.f(v);pose(st);aplicaFoco(t.foco,pulse,true);for(const k in SETAS)SETAS[k].visible=false;ar.visible=false;
+      const vol=volume(st);document.getElementById('cm'+i).style.width=(vol*100)+'%';
+      renderer.setViewport(i*W/3,BOT,W/3,H-TOPP-BOT);renderer.setScissor(i*W/3,BOT,W/3,H-TOPP-BOT);renderer.render(scene,camera);});
+    renderer.setScissorTest(false);
+  }else{
+    const f=C.f(p);pose(f.st);Object.assign(S,f.st);
+    if(f.fase!==lastFase||capEl.dataset.c!==f.cap){lastFase=f.fase;faseEl.textContent=certo?'✓ '+f.fase:f.fase;faseEl.className=certo?'':f.cls;capEl.textContent=f.cap;capEl.dataset.c=f.cap;}
+    aplicaFoco(f.foco,pulse,true);
+    const vol=volume(f.st);const f2=C.f(Math.min(p+.01,.9999));const flow=(volume(f2.st)-vol)/.01;
+    medI.style.height=(vol*100)+'%';medN.textContent=Math.round(vol*100)+'%';
+    // setas
+    const fl=clamp(flow*.45,-1,1);const dv=k=>clamp((f2.st[k]-f.st[k])/.01*.45,-1,1);
+    poeSeta('dia',dv('dia'),showSetas);
+    const cf=dv('cost');poeSeta('costR',cf,showSetas);poeSeta('costL',cf,showSetas);poeSeta('sterno',cf*.8,showSetas);
+    poeSeta('abd',dv('abd'),showSetas);
+    poeSeta('ombR',dv('alta'),showSetas);poeSeta('ombL',dv('alta'),showSetas);
+    ar.visible=showAr;if(showAr)stepAr(fl*(.35+vel*1.3),dt);
+    renderer.setViewport(0,0,innerWidth,innerHeight);renderer.render(scene,camera);
+  }
+  requestAnimationFrame(render);
+}
+resize();setCena(cena);
+if(Q.get('p')){tempo=+Q.get('p')*CENAS[cena].dur/(1);}
+if(tween){camera.position.copy(tween.p1);controls.target.copy(tween.t1);tween=null;}
+if(Q.get('sel'))select(Q.get('sel'));
+if(Q.has('dbg'))console.log('DBG',JSON.stringify(Object.fromEntries(Object.entries(P).map(([k,p])=>[k,p.meshes.length]))));
+render();
+</script>
+</body>
+</html>
